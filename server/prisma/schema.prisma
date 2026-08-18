@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  role         String        @default("PATIENT") // PATIENT, DOCTOR, ADMIN
+  phone        String?
+  avatar       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  doctorProfile Doctor?
+  appointments  Appointment[] @relation("PatientAppointments")
+  reviews       Review[]
+}
+
+model Specialty {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  icon        String?
+  doctors     Doctor[]
+}
+
+model Doctor {
+  id                  String        @id @default(uuid())
+  userId              String        @unique
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialtyId         String
+  specialty           Specialty     @relation(fields: [specialtyId], references: [id])
+  bio                 String
+  qualifications      String
+  experienceYears     Int           @default(5)
+  consultationFee     Float         @default(2500)
+  workingDays         String        @default("Monday,Tuesday,Wednesday,Thursday,Friday")
+  startTime           String        @default("09:00")
+  endTime             String        @default("17:00")
+  slotDurationMinutes Int           @default(30)
+  rating              Float         @default(4.8)
+  hospital            String        @default("CareSync Central Clinic, Colombo")
+  isActive            Boolean       @default(true)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  appointments        Appointment[]
+  reviews             Review[]
+}
+
+model Appointment {
+  id              String   @id @default(uuid())
+  patientId       String
+  patient         User     @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId        String
+  doctor          Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  appointmentDate String   // YYYY-MM-DD
+  appointmentTime String   // e.g. "09:30 AM"
+  status          String   @default("CONFIRMED") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  symptoms        String?
+  diagnosisNotes  String?
+  prescription    String?
+  fee             Float
+  paymentStatus   String   @default("PAID") // PENDING, PAID
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  patientId String
+  patient   User     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId  String
+  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  rating    Int      @default(5)
+  comment   String
+  createdAt DateTime @default(now())
+}

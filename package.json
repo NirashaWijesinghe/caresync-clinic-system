@@ -1,0 +1,10 @@
+{
+  "name": "caresync-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:server": "cd server && npm start",
+    "dev:client": "cd client && npm run dev",
+    "setup": "cd server && npm install && npm run db:setup && cd ../client && npm install"
+  }
+}
