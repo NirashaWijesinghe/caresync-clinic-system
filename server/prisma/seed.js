@@ -112,7 +112,7 @@ async function main() {
       password: doctorPassword,
       role: "DOCTOR",
       phone: "+94 77 555 1001",
-      avatar: "/images/doctors/dr_sarah.jpg"
+      avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256"
     }
   });
 
@@ -170,7 +170,7 @@ async function main() {
       password: doctorPassword,
       role: "DOCTOR",
       phone: "+94 77 555 1003",
-      avatar: "/images/doctors/dr_ruwan.jpg"
+      avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=256"
     }
   });
 
@@ -199,7 +199,7 @@ async function main() {
       password: doctorPassword,
       role: "DOCTOR",
       phone: "+94 77 555 1004",
-      avatar: "/images/doctors/dr_ananya.jpg"
+      avatar: "https://images.unsplash.com/photo-1614608682850-e0d6ed316d47?auto=format&fit=crop&q=80&w=256"
     }
   });
 
