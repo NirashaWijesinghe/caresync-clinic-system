@@ -159,6 +159,10 @@ export default function PatientDashboard() {
                   <img
                     src={apt.doctor?.user?.avatar || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256"}
                     alt={apt.doctor?.user?.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(apt.doctor?.user?.name || 'Doctor')}&background=0D8ABC&color=fff&bold=true`;
+                    }}
                     className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-100 flex-shrink-0"
                   />
                   <div className="space-y-1">

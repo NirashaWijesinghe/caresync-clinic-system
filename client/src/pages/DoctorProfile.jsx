@@ -61,6 +61,10 @@ export default function DoctorProfile() {
           <img
             src={doctor.user?.avatar || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256"}
             alt={doctor.user?.name}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.user?.name || 'Doctor')}&background=0D8ABC&color=fff&bold=true`;
+            }}
             className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl object-cover ring-4 ring-blue-500/20 shadow-md"
           />
           <div className="flex-1 space-y-2">

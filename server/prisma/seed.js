@@ -1,4 +1,4 @@
-﻿import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -141,7 +141,7 @@ async function main() {
       password: doctorPassword,
       role: "DOCTOR",
       phone: "+94 77 555 1002",
-      avatar: "https://images.unsplash.com/photo-1594824813681-efb45c26b685?auto=format&fit=crop&q=80&w=256"
+      avatar: "https://images.unsplash.com/photo-1594824813604-da84f139cb69?auto=format&fit=crop&q=80&w=256"
     }
   });
 

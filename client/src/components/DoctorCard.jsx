@@ -12,6 +12,10 @@ export default function DoctorCard({ doctor, onBookNow }) {
             <img
               src={doctor.user?.avatar || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256"}
               alt={doctor.user?.name}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.user?.name || 'Doctor')}&background=0D8ABC&color=fff&bold=true`;
+              }}
               className="w-20 h-20 rounded-2xl object-cover ring-2 ring-slate-100 group-hover:ring-blue-400 transition-all shadow-sm"
             />
             <span className="absolute -bottom-1 -right-1 bg-emerald-500 w-4 h-4 rounded-full border-2 border-white" title="Active"></span>

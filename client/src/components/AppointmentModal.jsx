@@ -97,6 +97,10 @@ export default function AppointmentModal({ doctor, isOpen, onClose, onSuccess })
             <img
               src={doctor.user?.avatar || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256"}
               alt={doctor.user?.name}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.user?.name || 'Doctor')}&background=0D8ABC&color=fff&bold=true`;
+              }}
               className="w-12 h-12 rounded-xl object-cover ring-2 ring-white/30"
             />
             <div>
