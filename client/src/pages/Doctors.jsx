@@ -3,10 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import API from "../services/api";
 import DoctorCard from "../components/DoctorCard";
 import AppointmentModal from "../components/AppointmentModal";
-import { Search, Stethoscope } from "lucide-react";
+import { Search, Stethoscope, Filter, X, Sparkles, SlidersHorizontal } from "lucide-react";
 
 export default function Doctors() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const specialtyQuery = searchParams.get("specialty") || "";
   const initialSearch = searchParams.get("search") || "";
 
@@ -54,28 +54,47 @@ export default function Doctors() {
     fetchDoctors();
   };
 
+  const handleClearFilters = () => {
+    setSelectedSpecialty("");
+    setSearchTerm("");
+    setSearchParams({});
+    setTimeout(() => fetchDoctors(), 50);
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-          Specialist Directory
-        </h1>
-        <p className="text-sm text-slate-500">
-          Browse certified healthcare specialists and book immediate clinic consultations
-        </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+      {/* Header Banner */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-slate-200/80">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <span>Certified Sri Lankan Specialists</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            Specialist Directory
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 font-normal">
+            Filter certified medical practitioners across disciplines and book dynamic 30-minute consultation slots.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">
+            {doctors.length} Doctors Available
+          </span>
+        </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="glass-panel p-4 rounded-3xl shadow-sm border border-slate-200/90 flex flex-col lg:flex-row gap-4 items-center justify-between">
         {/* Specialty Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+        <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 scrollbar-none">
           <button
             onClick={() => setSelectedSpecialty("")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+            className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
               selectedSpecialty === ""
-                ? "bg-blue-600 text-white shadow-sm"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                : "bg-slate-100/80 text-slate-600 hover:bg-slate-200/80"
             }`}
           >
             All Specialties
@@ -84,10 +103,10 @@ export default function Doctors() {
             <button
               key={s.id}
               onClick={() => setSelectedSpecialty(s.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
                 selectedSpecialty === s.id
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                  : "bg-slate-100/80 text-slate-600 hover:bg-slate-200/80"
               }`}
             >
               {s.name}
@@ -96,20 +115,20 @@ export default function Doctors() {
         </div>
 
         {/* Search Input */}
-        <form onSubmit={handleSearchSubmit} className="w-full md:w-80 flex items-center gap-2">
+        <form onSubmit={handleSearchSubmit} className="w-full lg:w-96 flex items-center gap-2">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
             <input
               type="text"
-              placeholder="Search doctor or hospital..."
+              placeholder="Doctor name, hospital or specialty..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-xs"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl"
+            className="px-5 py-2.5 bg-slate-900 hover:bg-blue-600 text-white text-xs font-bold rounded-2xl transition-colors shadow-xs"
           >
             Search
           </button>
@@ -120,7 +139,7 @@ export default function Doctors() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((n) => (
-            <div key={n} className="h-80 bg-slate-100 rounded-2xl animate-pulse"></div>
+            <div key={n} className="h-80 bg-slate-100 rounded-3xl animate-pulse"></div>
           ))}
         </div>
       ) : doctors.length > 0 ? (
@@ -134,14 +153,22 @@ export default function Doctors() {
           ))}
         </div>
       ) : (
-        <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 space-y-3">
-          <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-            <Stethoscope className="w-6 h-6" />
+        <div className="p-16 text-center bg-white rounded-3.5xl border border-slate-200 space-y-4 shadow-sm">
+          <div className="w-16 h-16 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto shadow-sm">
+            <Stethoscope className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">No Doctors Found</h3>
-          <p className="text-xs text-slate-500">
-            No active medical consultants matched your filter criteria. Try clearing search filters.
-          </p>
+          <div className="space-y-1">
+            <h3 className="text-xl font-extrabold text-slate-900">No Specialists Found</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              No active medical consultants matched your current filters. Try resetting the criteria.
+            </p>
+          </div>
+          <button
+            onClick={handleClearFilters}
+            className="px-5 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-2xl hover:bg-blue-700 transition-colors"
+          >
+            Clear All Filters
+          </button>
         </div>
       )}
 
