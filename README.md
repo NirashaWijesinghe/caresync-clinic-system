@@ -30,19 +30,6 @@ CareSync is a full-stack, enterprise-grade healthcare management application des
 - **Interactive Data Visualizations:** Monthly revenue growth trends and department load distributions powered by Recharts.
 - **Doctor Onboarding:** Register and configure medical consultants with custom consultation parameters and working hours.
 
----
-
-## 🔐 Demo Accounts
-
-Pre-configured accounts for testing different role permissions:
-
-| Role | Email | Password | Access Capabilities |
-| :--- | :--- | :--- | :--- |
-| **👑 Admin** | `admin@caresync.com` | `admin123` | Executive KPI Dashboard, Revenue Charts, Doctor Onboarding |
-| **👨‍⚕️ Doctor** | `dr.sarah@caresync.com` | `doctor123` | Patient Queue, Consultation Notes, E-Prescriptions |
-| **🧑‍💼 Patient** | `kasun@test.com` | `patient123` | Doctor Search, Slot Booking, Prescription Viewer |
-
-> 💡 **Tip:** The login page also features **1-Click Demo Buttons** to automatically populate credentials for quick role switching.
 
 ---
 
