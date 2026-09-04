@@ -121,20 +121,11 @@ erDiagram
 
 ---
 
-## ⚙️ Environment Variables
+## ⚙️ Configuration
 
-### Server (`server/.env`)
-```env
-PORT=5000
-DATABASE_URL="file:./dev.db"
-JWT_SECRET="your-secure-jwt-secret-key"
-NODE_ENV="development"
-```
-
-### Client (`client/.env`)
-```env
-VITE_API_URL="http://localhost:5000/api"
-```
+Set up environment variables using the provided templates:
+- **Server:** Copy `server/.env.example` to `server/.env`
+- **Client:** Copy `client/.env.example` to `client/.env`
 
 ---
 
