@@ -7,35 +7,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: "#f0f7ff",
-          100: "#e0effe",
-          200: "#bae0fd",
-          300: "#7cc5fb",
-          400: "#36a7f7",
-          500: "#0c8de9",
-          600: "#006fc7",
-          700: "#0158a1",
-          800: "#064b85",
-          900: "#0b3f6f",
+        primary: {
+          50: "#eff6ff",
+          100: "#dbeafe",
+          500: "#3b82f6",
+          600: "#2563eb",
+          700: "#1d4ed8",
+          800: "#1e40af",
+          900: "#1e3a8a",
         },
-        medical: {
-          teal: "#0d9488",
-          cyan: "#06b6d4",
-          emerald: "#10b981",
+        teal: {
+          500: "#14b8a6",
+          600: "#0d9488",
+          700: "#0f766e"
         }
       },
       fontFamily: {
-        sans: ["'Plus Jakarta Sans'", "Inter", "sans-serif"]
-      },
-      boxShadow: {
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
-        'elevated': '0 20px 40px -15px rgba(0, 0, 0, 0.07)',
-        'glow-blue': '0 0 25px -5px rgba(37, 99, 235, 0.3)',
-      },
-      borderRadius: {
-        '2.5xl': '1.25rem',
-        '3.5xl': '1.75rem',
+        sans: ["Plus Jakarta Sans", "Inter", "sans-serif"]
       }
     },
   },

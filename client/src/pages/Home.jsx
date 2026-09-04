@@ -17,11 +17,10 @@ import {
   Stethoscope,
   CheckCircle2,
   HeartHandshake,
+  Star,
   FileText,
-  Lock,
   Zap,
-  PhoneCall,
-  Star
+  ChevronRight
 } from "lucide-react";
 
 export default function Home() {
@@ -46,7 +45,7 @@ export default function Home() {
       setDoctors(docRes.data.doctors?.slice(0, 4) || []);
       setSpecialties(specRes.data.specialties || []);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load home data:", err);
     } finally {
       setLoading(false);
     }
@@ -61,118 +60,110 @@ export default function Home() {
     }
   };
 
-  const specialtyIcons = {
-    Cardiology: "❤️",
-    Dermatology: "✨",
-    Neurology: "🧠",
-    Pediatrics: "🧸",
-    Orthopedics: "🦴",
-    "General Medicine": "🩺"
-  };
-
   return (
     <div className="space-y-24 pb-24">
-      {/* 1. Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-32">
-        {/* Soft Ambient Background Glows */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-blue-400/20 to-teal-400/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+      {/* 1. Hero Section with Glowing Mesh */}
+      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-32 hero-mesh border-b border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Hero Text */}
             <div className="lg:col-span-7 space-y-7 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 text-blue-700 text-xs font-extrabold tracking-wide shadow-xs">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-extrabold tracking-wide shadow-xs">
                 <Sparkles className="w-4 h-4 text-blue-600 animate-pulse" />
-                <span>Next-Gen Smart Healthcare Platform</span>
+                <span>Next-Gen Healthcare & Clinic Management</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.12]">
-                Seamless Doctor Booking &{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-teal-600">
-                  Digital Healthcare.
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.12]">
+                Smart Specialist Booking. <br />
+                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-teal-500 bg-clip-text text-transparent">
+                  Zero Queue Waiting.
                 </span>
               </h1>
 
               <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                CareSync empowers patients to connect with board-certified medical specialists, reserve conflict-free dynamic 30-minute consultation slots, and receive instant digital prescriptions.
+                CareSync connects patients directly with certified medical consultants across Sri Lanka. Experience dynamic 30-minute time-slot bookings, instant E-prescriptions, and continuous clinical records.
               </p>
 
               {/* Hero Search Bar */}
-              <form onSubmit={handleSearchSubmit} className="max-w-xl mx-auto lg:mx-0 glass-panel p-2.5 rounded-3xl shadow-xl border border-slate-200/90 flex flex-col sm:flex-row gap-2.5">
-                <div className="flex-1 flex items-center px-4 gap-3">
-                  <Search className="w-5 h-5 text-blue-500 flex-shrink-0" />
+              <form
+                onSubmit={handleSearchSubmit}
+                className="max-w-xl mx-auto lg:mx-0 bg-white p-2.5 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200 flex flex-col sm:flex-row gap-2.5"
+              >
+                <div className="flex-1 flex items-center px-3.5 gap-3">
+                  <Search className="w-5 h-5 text-blue-600 flex-shrink-0" />
                   <input
                     type="text"
-                    placeholder="Search specialist name, department, or hospital..."
+                    placeholder="Search specialist by name, specialty, or clinic..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none bg-transparent"
+                    className="w-full text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none bg-transparent"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="py-3.5 px-7 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-2xl shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 active:scale-98"
+                  className="py-3.5 px-7 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl shadow-md shadow-blue-500/30 transition-all flex items-center justify-center gap-2 hover:gap-3"
                 >
-                  <span>Search</span>
+                  Find Doctors
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
 
-              {/* Trust Indicators */}
-              <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs font-bold text-slate-600">
+              {/* Quick Trust Badges */}
+              <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs font-semibold text-slate-600">
                 <span className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  SLMC Verified Specialists
+                  Board-Certified Doctors
                 </span>
                 <span className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-amber-500" />
-                  Instant Dynamic Slot Engine
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  Dynamic 30-Min Slots
                 </span>
                 <span className="flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-blue-500" />
-                  HIPAA-Grade Security
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  Secure E-Prescriptions
                 </span>
               </div>
             </div>
 
             {/* Right Hero Visual Card */}
             <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md bg-white rounded-3.5xl p-6 shadow-2xl border border-slate-200/80 group">
-                <div className="relative rounded-3xl overflow-hidden mb-6 h-72 shadow-inner">
+              <div className="relative mx-auto max-w-md bg-white rounded-3xl p-6 shadow-2xl shadow-slate-300/50 border border-slate-200/80">
+                <div className="relative rounded-2xl overflow-hidden mb-6 h-64">
                   <img
                     src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=800"
-                    alt="CareSync Clinic Hub"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    alt="CareSync Clinic"
+                    className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/20 to-transparent"></div>
-                  <div className="absolute bottom-5 left-5 right-5 text-white space-y-1">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-teal-500/90 text-white backdrop-blur-md">
-                      <HeartPulse className="w-3.5 h-3.5" /> CareSync Prime Care
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-teal-500/90 text-white backdrop-blur-md inline-block shadow-sm">
+                      CareSync Central Hospital
                     </span>
-                    <h3 className="font-extrabold text-xl leading-tight text-white">Central Medical Campus</h3>
-                    <p className="text-xs text-slate-200 font-medium">Colombo 03 • 24/7 Outpatient Wing</p>
+                    <h3 className="font-bold text-lg leading-tight mt-1.5">
+                      Advanced Medical & Clinical Network
+                    </h3>
                   </div>
                 </div>
 
-                {/* Floating Metrics */}
+                {/* Live Stats Row */}
                 <div className="grid grid-cols-2 gap-3.5">
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50/60 rounded-2.5xl border border-blue-100/90 flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/20">
+                  <div className="p-4 bg-blue-50/80 rounded-2xl border border-blue-100 flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm shadow-blue-500/30">
                       <CalendarCheck className="w-5 h-5" />
                     </div>
                     <div>
-                      <span className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">Live Slots</span>
-                      <span className="text-base font-black text-slate-900">Available</span>
+                      <span className="text-xs text-slate-500 block font-medium">Daily Slots</span>
+                      <span className="text-base font-extrabold text-slate-900">100% Realtime</span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-gradient-to-br from-teal-50 to-emerald-50/60 rounded-2.5xl border border-teal-100/90 flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-teal-600 text-white flex items-center justify-center font-bold shadow-md shadow-teal-500/20">
-                      <Star className="w-5 h-5 fill-white" />
+                  <div className="p-4 bg-teal-50/80 rounded-2xl border border-teal-100 flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold shadow-sm shadow-teal-500/30">
+                      <ShieldCheck className="w-5 h-5" />
                     </div>
                     <div>
-                      <span className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">Rating</span>
-                      <span className="text-base font-black text-slate-900">4.9 / 5.0</span>
+                      <span className="text-xs text-slate-500 block font-medium">Doctor Rating</span>
+                      <span className="text-base font-extrabold text-slate-900">4.9 / 5.0 ★</span>
                     </div>
                   </div>
                 </div>
@@ -185,14 +176,14 @@ export default function Home() {
       {/* 2. Medical Specialties Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
-          <span className="text-xs font-extrabold text-blue-600 tracking-widest uppercase bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+          <span className="text-xs font-extrabold text-blue-600 tracking-wider uppercase bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
             Specialized Care
           </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Consult Top Medical Disciplines
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            Consult Top Clinical Disciplines
           </h2>
-          <p className="text-sm text-slate-500 leading-relaxed font-normal">
-            Choose from comprehensive clinical departments managed by Sri Lanka's leading certified consultants.
+          <p className="text-sm sm:text-base text-slate-500">
+            Explore verified specialists across departments, review doctor credentials, and book consultation sessions.
           </p>
         </div>
 
@@ -201,15 +192,15 @@ export default function Home() {
             <Link
               key={spec.id}
               to={`/doctors?specialty=${spec.id}`}
-              className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs hover:shadow-xl hover:border-blue-400 hover:-translate-y-1.5 transition-all duration-300 text-center group flex flex-col items-center justify-center"
+              className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs hover:shadow-xl hover:border-blue-400 hover:-translate-y-1.5 transition-all duration-300 text-center group flex flex-col items-center justify-center relative overflow-hidden"
             >
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-600 group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white flex items-center justify-center transition-all duration-300 mb-3.5 shadow-xs group-hover:shadow-lg group-hover:shadow-blue-500/30 text-2xl">
-                <span>{specialtyIcons[spec.name] || "🩺"}</span>
+              <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-gradient-to-tr group-hover:from-blue-600 group-hover:to-teal-500 group-hover:text-white flex items-center justify-center transition-all duration-300 mb-3.5 shadow-xs">
+                <Stethoscope className="w-7 h-7" />
               </div>
-              <h3 className="font-extrabold text-sm text-slate-900 group-hover:text-blue-600 transition-colors">
+              <h3 className="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors">
                 {spec.name}
               </h3>
-              <span className="text-[11px] font-bold text-slate-400 mt-1">
+              <span className="text-xs text-slate-400 mt-1 font-medium">
                 {spec._count?.doctors || 1} Consultants
               </span>
             </Link>
@@ -219,21 +210,20 @@ export default function Home() {
 
       {/* 3. Featured Doctors Showcase */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
-          <div className="space-y-2">
-            <span className="text-xs font-extrabold text-teal-600 tracking-widest uppercase bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
-              Verified Doctors
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-10 gap-4">
+          <div>
+            <span className="text-xs font-extrabold text-blue-600 tracking-wider uppercase bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+              Verified Medical Panel
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-              Top Rated Specialists
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mt-2">
+              Top Rated Clinical Specialists
             </h2>
-            <p className="text-xs text-slate-500">Book your 30-minute consultation slot in real time</p>
           </div>
           <Link
             to="/doctors"
-            className="text-sm font-extrabold text-white bg-slate-900 hover:bg-blue-600 px-5 py-2.5 rounded-2xl shadow-sm transition-all flex items-center gap-2 group"
+            className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1.5 group px-4 py-2 rounded-xl hover:bg-blue-50 transition-all"
           >
-            <span>View All Doctors</span>
+            Explore All Doctors
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -241,7 +231,7 @@ export default function Home() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="h-80 bg-slate-100 rounded-3xl animate-pulse"></div>
+              <div key={n} className="h-88 bg-slate-100 rounded-3xl animate-pulse"></div>
             ))}
           </div>
         ) : (
@@ -257,62 +247,66 @@ export default function Home() {
         )}
       </section>
 
-      {/* 4. Why CareSync Feature Matrix */}
+      {/* 4. Why CareSync Platform Highlights */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-b from-slate-900 to-slate-950 rounded-3.5xl p-8 sm:p-14 text-white relative overflow-hidden shadow-2xl border border-slate-800">
-          <div className="max-w-2xl mx-auto text-center space-y-3 mb-14">
-            <span className="text-xs font-extrabold text-teal-400 tracking-widest uppercase bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
-              Clinical Quality
+        <div className="bg-gradient-to-tr from-slate-900 via-slate-800 to-blue-950 rounded-3xl p-8 sm:p-14 text-white relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="max-w-2xl mb-12 space-y-3 relative">
+            <span className="text-xs font-extrabold text-teal-400 tracking-wider uppercase">
+              Clinical Quality & Convenience
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              Why Patients & Doctors Choose CareSync
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Why Patients & Clinics Choose CareSync
             </h2>
-            <p className="text-sm text-slate-400">
-              Modern engineering designed to eliminate clinic queue bottlenecks and streamline digital health.
+            <p className="text-slate-300 text-sm sm:text-base">
+              Engineered with advanced scheduling algorithms and role-based workflows to eradicate clinic waiting rooms.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-3xl bg-slate-800/60 border border-slate-700/80 space-y-4 hover:border-teal-500/60 transition-colors">
-              <div className="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold">
-                <Clock className="w-6 h-6" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm space-y-3 hover:bg-white/10 transition-colors">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                <Zap className="w-6 h-6" />
               </div>
-              <h3 className="font-extrabold text-lg text-white">Dynamic 30-Min Slot Engine</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Smart scheduling algorithm computes consultation slots based on consultant operating hours and prevents double bookings in real time.
+              <h3 className="font-bold text-lg text-white">Dynamic Slot Engine</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Guaranteed 30-minute consultation intervals calculated in real-time from doctor working hours.
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-800/60 border border-slate-700/80 space-y-4 hover:border-blue-500/60 transition-colors">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm space-y-3 hover:bg-white/10 transition-colors">
+              <div className="w-12 h-12 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center">
                 <FileText className="w-6 h-6" />
               </div>
-              <h3 className="font-extrabold text-lg text-white">Digital E-Prescriptions</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Doctors issue structured dosage instructions and diagnosis summaries directly to patient medical portals for anytime download.
+              <h3 className="font-bold text-lg text-white">Digital E-Prescriptions</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Consultants issue structured digital medical records and prescriptions accessible anytime.
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-800/60 border border-slate-700/80 space-y-4 hover:border-indigo-500/60 transition-colors">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
-                <Activity className="w-6 h-6" />
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm space-y-3 hover:bg-white/10 transition-colors">
+              <div className="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                <Award className="w-6 h-6" />
               </div>
-              <h3 className="font-extrabold text-lg text-white">Executive Clinical Analytics</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Real-time clinic administration KPIs, departmental patient volume, and revenue trend graphs powered by Recharts.
+              <h3 className="font-bold text-lg text-white">Verified Consultants</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Only credentialed doctors with hospital affiliations are approved onto the CareSync medical panel.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Booking Modal Trigger */}
+      {/* Appointment Booking Modal */}
       {selectedDoctorForBooking && (
         <AppointmentModal
           doctor={selectedDoctorForBooking}
-          isOpen={!!selectedDoctorForBooking}
           onClose={() => setSelectedDoctorForBooking(null)}
-          onSuccess={() => fetchHomeData()}
+          onSuccess={() => {
+            setSelectedDoctorForBooking(null);
+            navigate("/dashboard");
+          }}
         />
       )}
     </div>

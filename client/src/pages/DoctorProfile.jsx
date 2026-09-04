@@ -10,10 +10,7 @@ import {
   Award,
   ShieldCheck,
   Stethoscope,
-  MessageSquare,
-  CheckCircle2,
-  Sparkles,
-  ArrowRight
+  MessageSquare
 } from "lucide-react";
 
 export default function DoctorProfile() {
@@ -40,24 +37,17 @@ export default function DoctorProfile() {
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-16">
-        <div className="h-96 bg-slate-100 rounded-3.5xl animate-pulse"></div>
+        <div className="h-96 bg-slate-100 rounded-3xl animate-pulse"></div>
       </div>
     );
   }
 
   if (!doctor) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-20 text-center space-y-4">
-        <div className="w-16 h-16 rounded-3xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-          <Stethoscope className="w-8 h-8" />
-        </div>
-        <h2 className="text-2xl font-extrabold text-slate-800">Specialist Not Found</h2>
-        <Link
-          to="/doctors"
-          className="inline-flex items-center gap-1 text-sm font-bold text-blue-600 hover:text-blue-700"
-        >
-          <span>Return to Specialist Directory</span>
-          <ArrowRight className="w-4 h-4" />
+      <div className="max-w-5xl mx-auto px-4 py-16 text-center">
+        <h2 className="text-xl font-bold">Doctor not found</h2>
+        <Link to="/doctors" className="text-blue-600 text-sm mt-2 block">
+          Back to Specialists
         </Link>
       </div>
     );
@@ -66,139 +56,119 @@ export default function DoctorProfile() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       {/* Profile Header Card */}
-      <div className="bg-white rounded-3.5xl p-8 sm:p-10 border border-slate-200/80 shadow-xl space-y-8 relative overflow-hidden">
-        {/* Subtle Top Accent */}
-        <div className="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-teal-500"></div>
+      <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-lg space-y-6">
+        <div className="flex flex-col sm:flex-row gap-6 items-start">
+          <img
+            src={doctor.user?.avatar || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256"}
+            alt={doctor.user?.name}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.user?.name || 'Doctor')}&background=0D8ABC&color=fff&bold=true`;
+            }}
+            className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl object-cover ring-4 ring-blue-500/20 shadow-md"
+          />
+          <div className="flex-1 space-y-2">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
+              {doctor.specialty?.name}
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+              {doctor.user?.name}
+            </h1>
+            <p className="text-sm font-medium text-slate-600">{doctor.qualifications}</p>
 
-        <div className="flex flex-col md:flex-row gap-8 items-start justify-between">
-          <div className="flex flex-col sm:flex-row gap-6 items-start">
-            <div className="relative">
-              <img
-                src={doctor.user?.avatar || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256"}
-                alt={doctor.user?.name}
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.user?.name || 'Doctor')}&background=0D8ABC&color=fff&bold=true`;
-                }}
-                className="w-32 h-32 sm:w-36 sm:h-36 rounded-3xl object-cover ring-4 ring-blue-500/15 shadow-lg"
-              />
-              <span className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1 rounded-full ring-2 ring-white" title="Verified Specialist">
-                <CheckCircle2 className="w-4 h-4" />
+            <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-slate-600">
+              <span className="flex items-center text-amber-500 font-bold gap-1 bg-amber-50 px-2.5 py-1 rounded-lg">
+                <Star className="w-4 h-4 fill-amber-400" />
+                {doctor.rating?.toFixed(1) || "4.8"} ({doctor.reviews?.length || 0} reviews)
               </span>
-            </div>
-
-            <div className="space-y-2.5">
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
-                {doctor.specialty?.name}
+              <span className="flex items-center gap-1.5 text-slate-600">
+                <Award className="w-4 h-4 text-blue-600" />
+                {doctor.experienceYears}+ Years Clinical Experience
               </span>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                {doctor.user?.name}
-              </h1>
-              <p className="text-sm font-semibold text-slate-600">{doctor.qualifications}</p>
-
-              <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-semibold text-slate-600">
-                <span className="flex items-center text-amber-600 font-bold gap-1 bg-amber-50 px-3 py-1 rounded-xl border border-amber-200/60">
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
-                  {doctor.rating?.toFixed(1) || "4.9"} ({doctor.reviews?.length || 0} reviews)
-                </span>
-                <span className="flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-xl text-slate-700">
-                  <Award className="w-4 h-4 text-blue-600" />
-                  {doctor.experienceYears}+ Years Clinical Experience
-                </span>
-              </div>
+              <span className="flex items-center gap-1.5 text-slate-600">
+                <MapPin className="w-4 h-4 text-slate-400" />
+                {doctor.hospital}
+              </span>
             </div>
           </div>
 
-          {/* Quick Booking CTA Box */}
-          <div className="w-full md:w-auto p-5 bg-gradient-to-br from-slate-50 to-blue-50/40 rounded-3xl border border-slate-200/80 flex md:flex-col justify-between items-center md:items-end gap-4 min-w-[200px]">
+          <div className="w-full sm:w-auto text-right sm:text-right flex sm:flex-col justify-between items-center sm:items-end pt-4 sm:pt-0 border-t sm:border-t-0 border-slate-100">
             <div>
-              <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Consultation Fee</span>
-              <span className="text-2xl font-black text-slate-900 tracking-tight">
+              <span className="text-xs text-slate-400 block font-medium">Consultation Fee</span>
+              <span className="text-2xl font-extrabold text-slate-900">
                 LKR {doctor.consultationFee?.toLocaleString()}
               </span>
             </div>
             <button
               onClick={() => setModalOpen(true)}
-              className="px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-extrabold rounded-2xl shadow-lg shadow-blue-500/25 transition-all flex items-center gap-2 active:scale-98"
+              className="mt-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-2xl shadow-md shadow-blue-500/25 transition-all"
             >
-              <span>Book Appointment</span>
-              <ArrowRight className="w-4 h-4" />
+              Book Consultation
             </button>
           </div>
         </div>
 
-        {/* Working Hours Specs */}
+        {/* Working Hours */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-100 text-xs">
-          <div className="p-4 bg-slate-50/70 rounded-2xl space-y-1 border border-slate-100">
-            <span className="text-slate-400 font-bold uppercase tracking-wider block">Clinic Location</span>
-            <p className="font-bold text-slate-800 truncate flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              {doctor.hospital}
-            </p>
-          </div>
-          <div className="p-4 bg-slate-50/70 rounded-2xl space-y-1 border border-slate-100">
-            <span className="text-slate-400 font-bold uppercase tracking-wider block">Consultation Schedule</span>
-            <p className="font-bold text-slate-800 flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-teal-600 flex-shrink-0" />
-              {doctor.startTime} - {doctor.endTime} ({doctor.slotDurationMinutes} min slots)
-            </p>
-          </div>
-          <div className="p-4 bg-slate-50/70 rounded-2xl space-y-1 border border-slate-100">
+          <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
             <span className="text-slate-400 font-bold uppercase tracking-wider block">Working Days</span>
-            <p className="font-bold text-slate-800 truncate flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-blue-600 flex-shrink-0" />
-              {doctor.workingDays}
+            <p className="font-semibold text-slate-800">{doctor.workingDays}</p>
+          </div>
+          <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
+            <span className="text-slate-400 font-bold uppercase tracking-wider block">Clinic Hours</span>
+            <p className="font-semibold text-slate-800">
+              {doctor.startTime} to {doctor.endTime}
             </p>
+          </div>
+          <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
+            <span className="text-slate-400 font-bold uppercase tracking-wider block">Slot Duration</span>
+            <p className="font-semibold text-slate-800">{doctor.slotDurationMinutes} Minutes per Patient</p>
           </div>
         </div>
       </div>
 
       {/* Bio Section */}
-      <div className="bg-white rounded-3.5xl p-8 sm:p-10 border border-slate-200/80 shadow-sm space-y-4">
-        <h3 className="font-black text-xl text-slate-900 tracking-tight">Doctor Biography & Clinical Expertise</h3>
-        <p className="text-sm text-slate-600 leading-relaxed font-normal">{doctor.bio}</p>
+      <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm space-y-4">
+        <h3 className="font-bold text-lg text-slate-900">Doctor Biography & Expertise</h3>
+        <p className="text-sm text-slate-600 leading-relaxed">{doctor.bio}</p>
       </div>
 
       {/* Patient Reviews */}
-      <div className="bg-white rounded-3.5xl p-8 sm:p-10 border border-slate-200/80 shadow-sm space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <h3 className="font-black text-xl text-slate-900 flex items-center gap-2.5">
+      <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-blue-600" />
-            Patient Feedback & Verified Reviews
+            Patient Feedback & Reviews
           </h3>
-          <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-xl">
-            {doctor.reviews?.length || 0} Reviews
+          <span className="text-xs font-semibold text-slate-500">
+            {doctor.reviews?.length || 0} Verified Reviews
           </span>
         </div>
 
         <div className="space-y-4">
           {doctor.reviews?.length > 0 ? (
             doctor.reviews.map((rev) => (
-              <div key={rev.id} className="p-5 rounded-2.5xl bg-slate-50/60 border border-slate-100 space-y-2.5">
+              <div key={rev.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     <img
-                      src={rev.patient?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(rev.patient?.name || 'Patient')}&background=0D8ABC&color=fff&bold=true`}
+                      src={rev.patient?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256"}
                       alt={rev.patient?.name}
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(rev.patient?.name || 'Patient')}&background=0D8ABC&color=fff&bold=true`;
-                      }}
-                      className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-500/20"
+                      className="w-7 h-7 rounded-full object-cover"
                     />
                     <span className="font-bold text-xs text-slate-800">{rev.patient?.name}</span>
                   </div>
-                  <div className="flex items-center text-amber-500 text-xs gap-0.5">
+                  <div className="flex items-center text-amber-500 text-xs">
                     {[...Array(rev.rating)].map((_, i) => (
                       <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
                     ))}
                   </div>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed pl-11">{rev.comment}</p>
+                <p className="text-xs text-slate-600 leading-relaxed">{rev.comment}</p>
               </div>
             ))
           ) : (
-            <p className="text-xs text-slate-400 py-4 text-center">No patient reviews submitted yet for this consultant.</p>
+            <p className="text-xs text-slate-400">No reviews yet for this consultant.</p>
           )}
         </div>
       </div>

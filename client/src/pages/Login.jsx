@@ -10,9 +10,7 @@ import {
   Stethoscope,
   User,
   AlertCircle,
-  Sparkles,
-  Loader2,
-  CheckCircle2
+  Sparkles
 } from "lucide-react";
 
 export default function Login() {
@@ -48,7 +46,7 @@ export default function Login() {
     }
   };
 
-  // Quick Demo Auto-fill Helper
+  // Quick Demo Auto-fill Helper for Recruiters / Reviewers
   const fillDemoCredentials = (role) => {
     if (role === "admin") {
       setEmail("admin@caresync.com");
@@ -63,67 +61,67 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4 py-16 relative">
-      <div className="max-w-md w-full space-y-7">
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
+      <div className="max-w-md w-full space-y-6">
         {/* Top Branding */}
-        <div className="text-center space-y-2.5">
-          <div className="inline-flex w-14 h-14 rounded-2.5xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-teal-500 items-center justify-center text-white shadow-xl shadow-blue-500/25 mb-1 group hover:scale-105 transition-transform">
-            <HeartPulse className="w-8 h-8" />
+        <div className="text-center space-y-2">
+          <div className="inline-flex w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-teal-500 items-center justify-center text-white shadow-lg shadow-blue-500/20 mb-2">
+            <HeartPulse className="w-7 h-7" />
           </div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Welcome to CareSync
           </h2>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-xs text-slate-500">
             Sign in to access your consultations, prescriptions, and clinic tools
           </p>
         </div>
 
-        {/* 1-Click Demo Switcher Card */}
-        <div className="p-4 sm:p-5 bg-gradient-to-br from-blue-50/90 via-white to-teal-50/50 rounded-3xl border border-blue-200/80 shadow-sm space-y-3">
+        {/* Demo Quick Access Card (Industry Standard Portfolio Feature) */}
+        <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50/60 rounded-2xl border border-blue-200/80 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-slate-800 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-blue-600" />
-              1-Click Demo Accounts
+            <span className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              Recruiter Demo Accounts
             </span>
-            <span className="text-[10px] uppercase font-extrabold text-blue-700 bg-blue-100/90 px-2.5 py-0.5 rounded-full">
-              Quick Test
+            <span className="text-[10px] uppercase font-semibold text-blue-600 bg-blue-100/80 px-2 py-0.5 rounded-full">
+              1-Click Fill
             </span>
           </div>
-          <p className="text-xs text-slate-600 leading-relaxed font-normal">
-            Select a role to populate pre-configured medical records:
+          <p className="text-[11px] text-slate-600">
+            Click any role to test full permissions with pre-populated medical records:
           </p>
           <div className="grid grid-cols-3 gap-2 pt-1">
             <button
               type="button"
               onClick={() => fillDemoCredentials("admin")}
-              className="py-2.5 px-2 bg-white hover:bg-purple-50 text-purple-700 text-xs font-bold rounded-2xl border border-purple-200 shadow-xs hover:border-purple-400 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+              className="py-1.5 px-2 bg-white hover:bg-purple-50 text-purple-700 text-xs font-semibold rounded-xl border border-purple-200 shadow-2xs hover:border-purple-400 transition-all flex items-center justify-center gap-1"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+              <ShieldCheck className="w-3 h-3 text-purple-600" />
               Admin
             </button>
             <button
               type="button"
               onClick={() => fillDemoCredentials("doctor")}
-              className="py-2.5 px-2 bg-white hover:bg-teal-50 text-teal-700 text-xs font-bold rounded-2xl border border-teal-200 shadow-xs hover:border-teal-400 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+              className="py-1.5 px-2 bg-white hover:bg-teal-50 text-teal-700 text-xs font-semibold rounded-xl border border-teal-200 shadow-2xs hover:border-teal-400 transition-all flex items-center justify-center gap-1"
             >
-              <Stethoscope className="w-3.5 h-3.5 text-teal-600" />
+              <Stethoscope className="w-3 h-3 text-teal-600" />
               Doctor
             </button>
             <button
               type="button"
               onClick={() => fillDemoCredentials("patient")}
-              className="py-2.5 px-2 bg-white hover:bg-blue-50 text-blue-700 text-xs font-bold rounded-2xl border border-blue-200 shadow-xs hover:border-blue-400 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+              className="py-1.5 px-2 bg-white hover:bg-blue-50 text-blue-700 text-xs font-semibold rounded-xl border border-blue-200 shadow-2xs hover:border-blue-400 transition-all flex items-center justify-center gap-1"
             >
-              <User className="w-3.5 h-3.5 text-blue-600" />
+              <User className="w-3 h-3 text-blue-600" />
               Patient
             </button>
           </div>
         </div>
 
-        {/* Login Form Card */}
-        <div className="bg-white p-8 sm:p-10 rounded-3.5xl border border-slate-200/80 shadow-xl space-y-6">
+        {/* Form Card */}
+        <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xl space-y-6">
           {errorMsg && (
-            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 flex items-center gap-2 font-medium">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{errorMsg}</span>
             </div>
@@ -131,7 +129,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Email Address
               </label>
               <div className="relative">
@@ -142,13 +140,13 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold text-slate-800 bg-slate-50/50 hover:bg-white transition-all shadow-xs"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -159,7 +157,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold text-slate-800 bg-slate-50/50 hover:bg-white transition-all shadow-xs"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
                 />
               </div>
             </div>
@@ -167,26 +165,17 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-extrabold rounded-2xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all hover:gap-2.5 active:scale-98 disabled:opacity-50"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all hover:gap-3 disabled:opacity-50"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Authenticating...</span>
-                </>
-              ) : (
-                <>
-                  <span>Sign In to Account</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              {loading ? "Signing in..." : "Sign In to Account"}
+              <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
           <div className="pt-4 border-t border-slate-100 text-center">
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs text-slate-600">
               Don't have an account yet?{" "}
-              <Link to="/register" className="font-extrabold text-blue-600 hover:text-blue-700">
+              <Link to="/register" className="font-bold text-blue-600 hover:text-blue-700">
                 Register as Patient
               </Link>
             </p>
