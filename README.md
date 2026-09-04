@@ -7,38 +7,38 @@
 [![Prisma ORM](https://img.shields.io/badge/Prisma_ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![JWT](https://img.shields.io/badge/JWT_Auth-black?style=for-the-badge&logo=JSON%20web%20tokens)](https://jwt.io/)
 
-CareSync is a full-stack, enterprise-grade healthcare management application connecting patients with certified medical specialists, managing doctor schedules through dynamic time-slot calculation algorithms, issuing digital prescriptions, and providing executive clinic analytics.
+CareSync is a full-stack, enterprise-grade healthcare management application designed to streamline clinic workflows, automate patient appointments through dynamic slot scheduling algorithms, issue digital prescriptions, and deliver executive-level clinical analytics.
 
 ---
 
-## 🌟 Key Highlights & Feature Matrix
+## 🌟 Key Features
 
-### 1. 🧑‍💼 Patient Experience
-- **Specialist Directory & Instant Search:** Filter doctors across clinical disciplines (Cardiology, Dermatology, Neurology, Pediatrics, etc.) with real-time keyword search.
-- **Dynamic Slot Booking Engine:** Intelligent slot generator calculates 30-minute consultation slots based on doctor working hours and automatically locks already booked intervals.
-- **Consultation Dashboard:** Real-time tracking of upcoming/completed visits with cancellation lifecycle.
-- **Digital E-Prescriptions & Clinical Notes:** Direct access to medical records, diagnosis summaries, and doctor prescriptions.
+### 🧑‍💼 Patient Portal
+- **Specialist Directory & Search:** Real-time filtering across medical disciplines (Cardiology, Dermatology, Neurology, Pediatrics, etc.).
+- **Dynamic Slot Booking Engine:** Intelligent slot generator calculates 30-minute consultation slots based on doctor working hours and automatically locks booked intervals.
+- **Appointment Management:** Real-time tracking of upcoming/completed visits with cancellation lifecycle.
+- **Digital E-Prescriptions:** Direct access to medical records, diagnosis summaries, and doctor prescriptions.
 - **Doctor Reviews & Ratings:** Verified patient feedback and star rating system.
 
-### 2. 👨‍⚕️ Doctor Clinical Hub
-- **Patient Queue & Daily Schedule:** Overview of scheduled appointments and patient contact logs.
-- **Consultation Lifecycle Management:** Seamlessly mark appointments as `CONFIRMED` or `COMPLETED`.
-- **E-Prescription Management:** Input clinical diagnosis notes and structured medication dosages.
+### 👨‍⚕️ Doctor Clinical Hub
+- **Queue & Daily Schedule:** Overview of scheduled patient appointments and contact logs.
+- **Consultation Management:** Update consultation status (`CONFIRMED`, `COMPLETED`, `CANCELLED`).
+- **E-Prescriptions:** Issue structured digital prescriptions and clinical diagnosis notes directly to patient records.
 
-### 3. 👑 Executive Admin & Analytics Portal
-- **Real-Time KPIs:** Live tracking of Total Patients, Active Doctors, Appointment Volume, and Clinic Gross Revenue (LKR).
-- **Interactive Data Visualizations (Recharts):** Monthly revenue growth area chart and department-wise specialist distribution bar chart.
-- **Doctor Onboarding Engine:** Register and activate new medical consultants with custom schedule parameters.
+### 👑 Executive Admin & Analytics Portal
+- **Clinic KPIs:** Live tracking of Total Patients, Active Doctors, Appointment Volume, and Clinic Revenue.
+- **Interactive Data Visualizations:** Monthly revenue growth trends and department load distributions powered by Recharts.
+- **Doctor Onboarding:** Register and configure medical consultants with custom consultation parameters and working hours.
 
 ---
 
-## 🔐 Pre-Seeded Demo Reviewer Accounts
+## 🔐 Demo Accounts
 
-For portfolio reviewers and technical interviewers:
+Pre-configured accounts for testing different role permissions:
 
 | Role | Email | Password | Access Capabilities |
 | :--- | :--- | :--- | :--- |
-| **👑 Admin** | `admin@caresync.com` | `admin123` | Executive KPI Dashboard, Revenue Charts, Doctor Management |
+| **👑 Admin** | `admin@caresync.com` | `admin123` | Executive KPI Dashboard, Revenue Charts, Doctor Onboarding |
 | **👨‍⚕️ Doctor** | `dr.sarah@caresync.com` | `doctor123` | Patient Queue, Consultation Notes, E-Prescriptions |
 | **🧑‍💼 Patient** | `kasun@test.com` | `patient123` | Doctor Search, Slot Booking, Prescription Viewer |
 
@@ -46,7 +46,7 @@ For portfolio reviewers and technical interviewers:
 
 ---
 
-## 🏗️ Architecture & Database Design
+## 🏗️ System Architecture & Entity Relationships
 
 ```mermaid
 erDiagram
@@ -100,66 +100,57 @@ erDiagram
 
 ---
 
-## 🚀 Getting Started Locally
+## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js**: v18+ (tested on Node v20/v22)
+- **Node.js**: v18.0.0 or higher
 - **Git**
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/YOUR_USERNAME/caresync.git
-cd caresync
-```
+### Installation & Setup
 
-### 2. Setup and Start Backend Server
-```bash
-cd server
-npm install
-npm run db:setup      # Creates local SQLite database & seeds sample data
-npm start             # Runs API server on http://localhost:5000
-```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/NirashaWijesinghe/caresync-clinic-system.git
+   cd caresync-clinic-system
+   ```
 
-### 3. Setup and Start Frontend Client (in a new terminal)
-```bash
-cd client
-npm install
-npm run dev           # Runs React client on http://localhost:5173
-```
+2. **Backend Setup:**
+   ```bash
+   cd server
+   npm install
+   npm run db:setup      # Creates database & seeds initial demo records
+   npm start             # Runs API server on http://localhost:5000
+   ```
 
-Open **`http://localhost:5173`** in your browser to view the application.
+3. **Frontend Setup (in a new terminal):**
+   ```bash
+   cd client
+   npm install
+   npm run dev           # Runs client on http://localhost:5173
+   ```
 
----
-
-## 🌐 Free Cloud Deployment Guide
-
-### Database & Backend Deployment (Render.com / Railway)
-1. Push this project to GitHub.
-2. Create a free PostgreSQL database on [Supabase.com](https://supabase.com) or [Neon.tech](https://neon.tech).
-3. On **Render.com**, create a **New Web Service** pointing to `/server`.
-4. Set Environment Variables:
-   - `DATABASE_URL`: Your Supabase connection string.
-   - `JWT_SECRET`: A secure random string.
-   - `PORT`: `5000`
-5. Build command: `npm install && npx prisma generate && npx prisma db push && node prisma/seed.js`
-6. Start command: `node src/server.js`
-
-### Frontend Deployment (Vercel)
-1. On **Vercel.com**, import the repository and select `/client` as the Root Directory.
-2. Set Environment Variable:
-   - `VITE_API_URL`: `https://your-backend.onrender.com/api`
-3. Click **Deploy**.
+4. **Access the application:**
+   Open `http://localhost:5173` in your browser.
 
 ---
 
-## 📄 Recommended CV Bullet Points
+## ⚙️ Environment Variables
 
-```text
-CareSync | Full-Stack Healthcare & Doctor Appointment Management System
-Tech Stack: React, Node.js, Express, Tailwind CSS, Prisma ORM, JWT, Recharts
-Live Demo: [your-live-link] | GitHub: [your-github-repo-link]
-• Architected a production-ready clinic management system with multi-tier Role-Based Access Control (Admin, Doctor, Patient) using JWT authentication and BCrypt.
-• Implemented a dynamic time-slot scheduling algorithm supporting flexible doctor working hours, conflict avoidance, and real-time consultation bookings.
-• Built interactive analytics dashboards using Recharts to visualize monthly revenue growth, department load, and patient appointment metrics.
-• Engineered digital medical records workflows enabling consultants to issue structured E-prescriptions and clinical diagnosis summaries.
+### Server (`server/.env`)
+```env
+PORT=5000
+DATABASE_URL="file:./dev.db"
+JWT_SECRET="your-secure-jwt-secret-key"
+NODE_ENV="development"
 ```
+
+### Client (`client/.env`)
+```env
+VITE_API_URL="http://localhost:5000/api"
+```
+
+---
+
+## 📜 License
+
+This project is licensed under the [MIT License](LICENSE).
