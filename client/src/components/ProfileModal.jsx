@@ -13,9 +13,7 @@ import {
   CreditCard,
   FileText,
   Loader2,
-  UploadCloud,
-  Image as ImageIcon,
-  RotateCcw
+  Upload
 } from "lucide-react";
 
 const PRESET_AVATARS = [
@@ -41,44 +39,32 @@ export default function ProfileModal({ isOpen, onClose }) {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState(false);
-  const [fileName, setFileName] = useState("");
 
   if (!isOpen || !user) return null;
 
-  // Handle local laptop image file upload
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  // Handle direct file upload from PC / Phone
+  const handleImageFileChange = (e) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    setErrorMsg("");
-
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       setErrorMsg("Please select a valid image file (PNG, JPG, JPEG, WEBP).");
       return;
     }
 
-    // Validate file size (Max 3MB)
-    if (file.size > 3 * 1024 * 1024) {
-      setErrorMsg("Image size is too large. Please select a photo under 3MB.");
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg("Image size exceeds 5MB limit. Please choose a smaller photo.");
       return;
     }
 
-    setFileName(file.name);
+    setErrorMsg("");
     const reader = new FileReader();
-    reader.onload = (uploadEvent) => {
-      setAvatar(uploadEvent.target.result);
-    };
-    reader.onerror = () => {
-      setErrorMsg("Failed to read image file. Please try another photo.");
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setAvatar(event.target.result);
+      }
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleResetToDefault = () => {
-    setFileName("");
-    const defaultAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name || 'User')}`;
-    setAvatar(defaultAvatar);
   };
 
   const handleSubmit = async (e) => {
@@ -88,14 +74,6 @@ export default function ProfileModal({ isOpen, onClose }) {
     if (name.trim().length < 2) {
       setErrorMsg("Full name must be at least 2 characters long.");
       return;
-    }
-
-    if (phone.trim()) {
-      const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{7,15}$/;
-      if (/[a-zA-Z]/.test(phone) || !phoneRegex.test(phone.trim())) {
-        setErrorMsg("Please enter a valid phone number (digits only).");
-        return;
-      }
     }
 
     if (user.role === "DOCTOR") {
@@ -137,9 +115,9 @@ export default function ProfileModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 overflow-hidden relative max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 overflow-hidden relative">
         {/* Header */}
-        <div className="flex justify-between items-center border-b pb-4 flex-shrink-0">
+        <div className="flex justify-between items-center border-b pb-4">
           <div>
             <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Account Settings</span>
             <h3 className="font-bold text-xl text-slate-900">Manage Profile</h3>
@@ -158,29 +136,38 @@ export default function ProfileModal({ isOpen, onClose }) {
               <CheckCircle2 className="w-10 h-10" />
             </div>
             <h4 className="text-xl font-bold text-slate-900">Profile Updated!</h4>
-            <p className="text-xs text-slate-500">Your account changes have been saved across the portal.</p>
+            <p className="text-xs text-slate-500">Your account changes and photo have been saved across the portal.</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-5 pt-4 overflow-y-auto pr-1">
+          <form onSubmit={handleSubmit} className="space-y-5 pt-4">
             {errorMsg && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2 animate-in fade-in duration-200">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
-            {/* Avatar Section */}
-            <div className="space-y-3.5 p-4 bg-slate-50/80 rounded-2xl border border-slate-200/70">
+            {/* Hidden File Input for Device Photo Upload */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleImageFileChange}
+              className="hidden"
+            />
+
+            {/* Avatar Section with Clickable Camera Icon */}
+            <div className="space-y-3">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Profile Photo & Avatar
+                Profile Photo / Avatar
               </label>
 
               <div className="flex flex-col sm:flex-row items-center gap-4">
-                {/* Image Preview with click-to-upload */}
+                {/* Clickable Avatar Circle with Floating Camera Icon */}
                 <div
                   onClick={() => fileInputRef.current?.click()}
                   className="relative group flex-shrink-0 cursor-pointer"
-                  title="Click to choose a photo from your laptop"
+                  title="Click to upload photo from your computer/device"
                 >
                   <img
                     src={avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256"}
@@ -189,99 +176,62 @@ export default function ProfileModal({ isOpen, onClose }) {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=2563eb&color=fff&bold=true`;
                     }}
-                    className="w-18 h-18 rounded-2xl object-cover ring-4 ring-blue-500/20 shadow-md group-hover:opacity-90 transition-all"
+                    className="w-20 h-20 rounded-3xl object-cover ring-4 ring-blue-500/20 shadow-md group-hover:opacity-90 transition-all"
                   />
-                  <div className="absolute inset-0 bg-black/40 rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-[10px] font-bold">
-                    <Camera className="w-5 h-5 mb-0.5" />
-                    <span>Change</span>
+                  
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-black/35 rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Upload className="w-6 h-6 text-white animate-bounce" />
                   </div>
+
+                  {/* Floating Camera Button Badge */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
+                    className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg ring-2 ring-white transition-all transform group-hover:scale-110"
+                    title="Upload photo from device"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </button>
                 </div>
 
-                {/* Upload Buttons & File Controls */}
+                {/* Preset Avatars & Upload Hint */}
                 <div className="flex-1 space-y-2 text-center sm:text-left">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept="image/png, image/jpeg, image/jpg, image/webp"
-                    className="hidden"
-                  />
-
-                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <UploadCloud className="w-3.5 h-3.5" />
-                      Upload from Laptop
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleResetToDefault}
-                      className="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-600 text-xs font-semibold rounded-xl border border-slate-200 transition-all flex items-center gap-1 cursor-pointer"
-                      title="Reset to generated avatar"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      Reset
-                    </button>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      Click camera to upload custom photo or pick preset:
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 justify-center sm:justify-start">
+                    {PRESET_AVATARS.map((presetUrl, idx) => (
+                      <button
+                        type="button"
+                        key={idx}
+                        onClick={() => setAvatar(presetUrl)}
+                        className={`w-8 h-8 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
+                          avatar === presetUrl ? "border-blue-600 scale-110 shadow-xs" : "border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100"
+                        }`}
+                      >
+                        <img src={presetUrl} alt="preset" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
                   </div>
 
-                  {fileName ? (
-                    <p className="text-[11px] text-emerald-600 font-medium truncate flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
-                      Selected: {fileName}
-                    </p>
-                  ) : (
-                    <p className="text-[11px] text-slate-500">
-                      Supports JPG, PNG, WEBP (Max 3MB)
-                    </p>
-                  )}
+                  <p className="text-[10px] text-slate-400">
+                    💡 Supports JPG, PNG, WEBP from your PC/Phone.
+                  </p>
                 </div>
-              </div>
-
-              {/* Preset Avatars Selection */}
-              <div className="space-y-1.5 pt-2 border-t border-slate-200/60">
-                <span className="text-[11px] font-semibold text-slate-500 block">Or Choose a Medical Preset:</span>
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {PRESET_AVATARS.map((presetUrl, idx) => (
-                    <button
-                      type="button"
-                      key={idx}
-                      onClick={() => {
-                        setFileName("");
-                        setAvatar(presetUrl);
-                      }}
-                      className={`w-8 h-8 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 cursor-pointer ${
-                        avatar === presetUrl ? "border-blue-600 scale-110 shadow-xs" : "border-slate-200 hover:border-slate-400"
-                      }`}
-                    >
-                      <img src={presetUrl} alt="preset" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Custom Image URL Option */}
-              <div>
-                <input
-                  type="url"
-                  value={avatar.startsWith("data:image") ? "" : avatar}
-                  onChange={(e) => {
-                    setFileName("");
-                    setAvatar(e.target.value);
-                  }}
-                  placeholder="Or paste external image URL (https://...)"
-                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-mono"
-                />
               </div>
             </div>
 
             {/* Name & Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Full Name</label>
                 <div className="relative">
                   <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
                   <input
@@ -289,7 +239,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs font-medium"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
                   />
                 </div>
               </div>
@@ -303,7 +253,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+94 77 123 4567"
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs font-medium"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
                   />
                 </div>
               </div>
@@ -323,53 +273,53 @@ export default function ProfileModal({ isOpen, onClose }) {
                       className="w-full p-2 rounded-xl border border-slate-300 text-xs"
                     />
                   </div>
-
                   <div>
                     <label className="block font-bold text-slate-700 uppercase mb-1">Consultation Fee (LKR)</label>
                     <input
                       type="number"
                       value={consultationFee}
                       onChange={(e) => setConsultationFee(e.target.value)}
-                      placeholder="2500"
                       className="w-full p-2 rounded-xl border border-slate-300 text-xs"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase mb-1">Professional Bio</label>
+                  <label className="block font-bold text-slate-700 uppercase mb-1">Doctor Bio</label>
                   <textarea
                     rows={2}
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="Brief introduction about your clinical background..."
+                    placeholder="Short description of medical expertise..."
                     className="w-full p-2 rounded-xl border border-slate-300 text-xs"
                   ></textarea>
                 </div>
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4 border-t flex-shrink-0">
+            {/* Submit Actions */}
+            <div className="flex gap-2.5 pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={onClose}
-                className="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                className="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="w-2/3 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                className="w-2/3 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center gap-1.5 transition-all"
               >
                 {saving ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving Changes...
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Saving Changes...
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Save Profile
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Save Profile Changes
                   </>
                 )}
               </button>
