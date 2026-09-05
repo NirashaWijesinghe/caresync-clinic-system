@@ -94,34 +94,63 @@ export default function AdminDashboard() {
   };
 
   const [doctorModalError, setDoctorModalError] = useState("");
+  const [doctorModalTouched, setDoctorModalTouched] = useState({});
   const [addingDoctor, setAddingDoctor] = useState(false);
 
-  const handleAddDoctorSubmit = async (e) => {
-    e.preventDefault();
-    setDoctorModalError("");
-
-    if (newDoctorData.name.trim().length < 2) {
-      setDoctorModalError("Doctor full name must be at least 2 characters long.");
-      return;
+  // Real-time Onboard Doctor Validations
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const validateDoctorForm = () => {
+    const errs = {};
+    if (!newDoctorData.name.trim()) {
+      if (doctorModalTouched.name) errs.name = "Doctor full name is required.";
+    } else if (newDoctorData.name.trim().length < 3) {
+      errs.name = "Doctor name must be at least 3 characters.";
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(newDoctorData.email.trim())) {
-      setDoctorModalError("Please enter a valid email address (e.g. dr.name@caresync.com).");
-      return;
+    if (!newDoctorData.email.trim()) {
+      if (doctorModalTouched.email) errs.email = "Doctor email is required.";
+    } else if (!emailRegex.test(newDoctorData.email.trim())) {
+      errs.email = "Please enter a valid email (e.g. dr.name@caresync.com).";
     }
 
-    if (newDoctorData.password.length < 6) {
-      setDoctorModalError("Temporary password must be at least 6 characters long.");
-      return;
+    if (!newDoctorData.password) {
+      if (doctorModalTouched.password) errs.password = "Initial password is required.";
+    } else if (newDoctorData.password.length < 6) {
+      errs.password = "Password must be at least 6 characters.";
     }
 
     const feeNum = Number(newDoctorData.consultationFee);
     if (isNaN(feeNum) || feeNum <= 0) {
-      setDoctorModalError("Consultation fee must be a valid positive number.");
+      errs.consultationFee = "Fee must be a positive number (e.g. 2500).";
+    }
+
+    if (doctorModalTouched.qualifications && !newDoctorData.qualifications.trim()) {
+      errs.qualifications = "Qualifications required (e.g. MBBS, MD).";
+    }
+
+    return errs;
+  };
+
+  const docErrors = validateDoctorForm();
+
+  const handleAddDoctorSubmit = async (e) => {
+    e.preventDefault();
+    setDoctorModalError("");
+    setDoctorModalTouched({
+      name: true,
+      email: true,
+      password: true,
+      qualifications: true,
+      consultationFee: true
+    });
+
+    const formErrs = validateDoctorForm();
+    if (Object.keys(formErrs).length > 0) {
+      setDoctorModalError("Please correct the highlighted errors in the form.");
       return;
     }
 
+    const feeNum = Number(newDoctorData.consultationFee);
     setAddingDoctor(true);
     try {
       await API.post("/admin/doctors", {
@@ -135,6 +164,7 @@ export default function AdminDashboard() {
       });
       setSuccessMsg("New doctor onboarded successfully!");
       setShowAddDoctorModal(false);
+      setDoctorModalTouched({});
       fetchAdminData();
       setTimeout(() => setSuccessMsg(""), 3500);
     } catch (err) {
@@ -639,25 +669,47 @@ export default function AdminDashboard() {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              {/* Doctor Full Name */}
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Doctor Full Name</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                  <span>Doctor Full Name *</span>
+                  {newDoctorData.name.trim().length >= 3 && !docErrors.name && (
+                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                      <CheckCircle2 className="w-3 h-3" /> Valid
+                    </span>
+                  )}
+                </label>
                 <input
                   type="text"
                   required
                   autoComplete="off"
                   value={newDoctorData.name}
+                  onBlur={() => setDoctorModalTouched((p) => ({ ...p, name: true }))}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, name: e.target.value })}
                   placeholder="e.g. Dr. Nihal Jayasinghe"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
+                  className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
+                    docErrors.name
+                      ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
+                      : newDoctorData.name.trim().length >= 3
+                      ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+                      : "border-slate-300 focus:ring-2 focus:ring-blue-500"
+                  }`}
                 />
+                {docErrors.name && (
+                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                    {docErrors.name}
+                  </p>
+                )}
               </div>
 
+              {/* Specialty Discipline */}
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Specialty Discipline</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Specialty Discipline *</label>
                 <select
                   value={newDoctorData.specialtyId}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, specialtyId: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                 >
                   {specialties.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>
@@ -665,53 +717,139 @@ export default function AdminDashboard() {
                 </select>
               </div>
 
+              {/* Doctor Login Email */}
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Doctor Login Email</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                  <span>Doctor Login Email *</span>
+                  {newDoctorData.email.trim() && !docErrors.email && (
+                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                      <CheckCircle2 className="w-3 h-3" /> Valid
+                    </span>
+                  )}
+                </label>
                 <input
                   type="email"
                   required
                   autoComplete="new-email"
                   value={newDoctorData.email}
+                  onBlur={() => setDoctorModalTouched((p) => ({ ...p, email: true }))}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, email: e.target.value })}
                   placeholder="dr.nihal@caresync.com"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
+                  className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
+                    docErrors.email
+                      ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
+                      : newDoctorData.email.trim() && !docErrors.email
+                      ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+                      : "border-slate-300 focus:ring-2 focus:ring-blue-500"
+                  }`}
                 />
+                {docErrors.email && (
+                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                    {docErrors.email}
+                  </p>
+                )}
               </div>
 
+              {/* Initial Password */}
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Initial Password</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                  <span>Initial Password *</span>
+                  {newDoctorData.password.length >= 6 && (
+                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                      <CheckCircle2 className="w-3 h-3" /> Valid
+                    </span>
+                  )}
+                </label>
                 <input
                   type="password"
                   required
                   autoComplete="new-password"
                   value={newDoctorData.password}
+                  onBlur={() => setDoctorModalTouched((p) => ({ ...p, password: true }))}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, password: e.target.value })}
                   placeholder="doctor123"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
+                  className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
+                    docErrors.password
+                      ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
+                      : newDoctorData.password.length >= 6
+                      ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+                      : "border-slate-300 focus:ring-2 focus:ring-blue-500"
+                  }`}
                 />
+                {docErrors.password && (
+                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                    {docErrors.password}
+                  </p>
+                )}
               </div>
 
+              {/* Qualifications */}
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Qualifications</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                  <span>Qualifications *</span>
+                  {newDoctorData.qualifications.trim() && (
+                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                      <CheckCircle2 className="w-3 h-3" /> Valid
+                    </span>
+                  )}
+                </label>
                 <input
                   type="text"
+                  required
                   autoComplete="off"
                   value={newDoctorData.qualifications}
+                  onBlur={() => setDoctorModalTouched((p) => ({ ...p, qualifications: true }))}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, qualifications: e.target.value })}
                   placeholder="MBBS, MD (Cardiology)"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
+                  className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
+                    docErrors.qualifications
+                      ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
+                      : newDoctorData.qualifications.trim()
+                      ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+                      : "border-slate-300 focus:ring-2 focus:ring-blue-500"
+                  }`}
                 />
+                {docErrors.qualifications && (
+                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                    {docErrors.qualifications}
+                  </p>
+                )}
               </div>
 
+              {/* Consultation Fee */}
               <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Consultation Fee (LKR)</label>
+                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                  <span>Consultation Fee (LKR) *</span>
+                  {Number(newDoctorData.consultationFee) > 0 && (
+                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                      <CheckCircle2 className="w-3 h-3" /> Valid
+                    </span>
+                  )}
+                </label>
                 <input
                   type="number"
                   required
+                  min="500"
                   value={newDoctorData.consultationFee}
+                  onBlur={() => setDoctorModalTouched((p) => ({ ...p, consultationFee: true }))}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, consultationFee: Number(e.target.value) })}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
+                  className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
+                    docErrors.consultationFee
+                      ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
+                      : Number(newDoctorData.consultationFee) > 0
+                      ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+                      : "border-slate-300 focus:ring-2 focus:ring-blue-500"
+                  }`}
                 />
+                {docErrors.consultationFee && (
+                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                    {docErrors.consultationFee}
+                  </p>
+                )}
               </div>
             </div>
 
