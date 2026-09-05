@@ -32,6 +32,7 @@ export default function DoctorProfile() {
   const REVIEWS_PER_PAGE = 3;
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchDoctor();
   }, [id]);
 
