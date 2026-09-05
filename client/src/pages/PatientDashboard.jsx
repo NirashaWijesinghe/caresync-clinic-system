@@ -29,6 +29,8 @@ export default function PatientDashboard() {
   const [actionMsg, setActionMsg] = useState("");
 
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewedAptIds, setReviewedAptIds] = useState(() => {
     try {
       const saved = localStorage.getItem("caresync_reviewed_apts");
