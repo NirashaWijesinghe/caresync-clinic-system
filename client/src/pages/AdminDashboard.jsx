@@ -70,16 +70,23 @@ export default function AdminDashboard() {
     }
   };
 
+  const [doctorModalError, setDoctorModalError] = useState("");
+  const [addingDoctor, setAddingDoctor] = useState(false);
+
   const handleAddDoctorSubmit = async (e) => {
     e.preventDefault();
+    setDoctorModalError("");
+    setAddingDoctor(true);
     try {
       await API.post("/admin/doctors", newDoctorData);
       setSuccessMsg("New doctor onboarded successfully!");
       setShowAddDoctorModal(false);
       fetchAdminData();
-      setTimeout(() => setSuccessMsg(""), 3000);
+      setTimeout(() => setSuccessMsg(""), 3500);
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to add doctor");
+      setDoctorModalError(err.response?.data?.message || "Failed to add doctor");
+    } finally {
+      setAddingDoctor(false);
     }
   };
 
@@ -272,12 +279,22 @@ export default function AdminDashboard() {
               </div>
               <button
                 type="button"
-                onClick={() => setShowAddDoctorModal(false)}
+                onClick={() => {
+                  setShowAddDoctorModal(false);
+                  setDoctorModalError("");
+                }}
                 className="p-1 rounded-full hover:bg-slate-100 text-slate-500"
               >
                 ✕
               </button>
             </div>
+
+            {doctorModalError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{doctorModalError}</span>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>

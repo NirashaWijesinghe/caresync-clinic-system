@@ -188,23 +188,36 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
-          {specialties.map((spec) => (
-            <Link
-              key={spec.id}
-              to={`/doctors?specialty=${spec.id}`}
-              className="clinic-card p-6 text-center group flex flex-col items-center justify-center"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-colors mb-3">
-                <Stethoscope className="w-7 h-7" />
-              </div>
-              <h3 className="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors">
-                {spec.name}
-              </h3>
-              <span className="text-xs text-slate-400 mt-1 font-medium">
-                {spec._count?.doctors || 1} Specialists
-              </span>
-            </Link>
-          ))}
+          {specialties.map((spec) => {
+            const count = spec._count?.doctors ?? 0;
+            const iconName = spec.icon;
+            
+            // Map icon dynamically based on specialty name or icon key
+            let IconComp = Stethoscope;
+            if (iconName === "HeartPulse" || spec.name.toLowerCase().includes("cardio")) IconComp = HeartPulse;
+            else if (iconName === "Sparkles" || spec.name.toLowerCase().includes("derma")) IconComp = Sparkles;
+            else if (iconName === "Activity" || spec.name.toLowerCase().includes("neuro")) IconComp = Activity;
+            else if (iconName === "Baby" || spec.name.toLowerCase().includes("pediatric")) IconComp = Baby;
+            else if (iconName === "ShieldPlus" || spec.name.toLowerCase().includes("ortho")) IconComp = Bone;
+
+            return (
+              <Link
+                key={spec.id}
+                to={`/doctors?specialty=${spec.id}`}
+                className="clinic-card p-6 text-center group flex flex-col items-center justify-center"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all mb-3 shadow-2xs group-hover:shadow-md group-hover:scale-105">
+                  <IconComp className="w-7 h-7" />
+                </div>
+                <h3 className="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors">
+                  {spec.name}
+                </h3>
+                <span className="text-xs text-slate-400 mt-1 font-medium">
+                  {count} {count === 1 ? "Specialist" : "Specialists"}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 

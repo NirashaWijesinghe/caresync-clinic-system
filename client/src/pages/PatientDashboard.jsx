@@ -28,6 +28,16 @@ export default function PatientDashboard() {
   const [reviewComment, setReviewComment] = useState("");
   const [actionMsg, setActionMsg] = useState("");
 
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewedAptIds, setReviewedAptIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem("caresync_reviewed_apts");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   useEffect(() => {
     fetchAppointments();
   }, []);
@@ -43,20 +53,27 @@ export default function PatientDashboard() {
     }
   };
 
+  const [reviewError, setReviewError] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   const handleCancel = async (id) => {
     if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
     try {
       await API.patch(`/appointments/${id}/cancel`);
       setActionMsg("Appointment cancelled successfully");
       fetchAppointments();
+      setTimeout(() => setActionMsg(""), 3500);
     } catch (err) {
-      alert("Failed to cancel appointment");
+      setActionMsg(err.response?.data?.message || "Failed to cancel appointment");
+      setTimeout(() => setActionMsg(""), 3500);
     }
   };
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!reviewModalAppointment) return;
+    setReviewError("");
+    setSubmittingReview(true);
 
     try {
       await API.post("/appointments/reviews", {
@@ -64,11 +81,22 @@ export default function PatientDashboard() {
         rating: reviewRating,
         comment: reviewComment
       });
-      setReviewModalAppointment(null);
-      setReviewComment("");
-      alert("Thank you! Review submitted successfully.");
+
+      // Save reviewed appointment to prevent duplicate submissions
+      const updatedReviewed = [...reviewedAptIds, reviewModalAppointment.id];
+      setReviewedAptIds(updatedReviewed);
+      localStorage.setItem("caresync_reviewed_apts", JSON.stringify(updatedReviewed));
+
+      setReviewSuccess(true);
+      setTimeout(() => {
+        setReviewSuccess(false);
+        setReviewModalAppointment(null);
+        setReviewComment("");
+      }, 1800);
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to submit review");
+      setReviewError(err.response?.data?.message || "Failed to submit review");
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -220,13 +248,20 @@ export default function PatientDashboard() {
                         Prescription & Notes
                       </button>
 
-                      <button
-                        onClick={() => setReviewModalAppointment(apt)}
-                        className="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl flex items-center gap-1 transition-colors"
-                      >
-                        <Star className="w-3.5 h-3.5 fill-amber-400" />
-                        Rate Doctor
-                      </button>
+                      {reviewedAptIds.includes(apt.id) ? (
+                        <span className="px-3 py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-xl flex items-center gap-1.5 border border-emerald-200/80 shadow-2xs">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          Reviewed
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => setReviewModalAppointment(apt)}
+                          className="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl flex items-center gap-1 transition-colors"
+                        >
+                          <Star className="w-3.5 h-3.5 fill-amber-400" />
+                          Rate Doctor
+                        </button>
+                      )}
                     </>
                   )}
 
@@ -299,63 +334,98 @@ export default function PatientDashboard() {
 
       {/* Review Modal */}
       {reviewModalAppointment && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleReviewSubmit} className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-5">
-            <div className="flex justify-between items-center border-b pb-3">
-              <h3 className="font-bold text-lg text-slate-900">Review {reviewModalAppointment.doctor?.user?.name}</h3>
-              <button
-                type="button"
-                onClick={() => setReviewModalAppointment(null)}
-                className="p-1 rounded-full hover:bg-slate-100 text-slate-500"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-2">Rating (1 to 5 Stars)</label>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 overflow-hidden">
+            {reviewSuccess ? (
+              <div className="py-8 px-4 text-center space-y-4 animate-in zoom-in-95 duration-300">
+                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-emerald-50 animate-bounce">
+                  <CheckCircle2 className="w-10 h-10" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-extrabold text-slate-900">Thank You, {user?.name}!</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+                    Your verified review & rating for <span className="font-bold text-slate-700">{reviewModalAppointment.doctor?.user?.name}</span> have been published successfully.
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <span className="inline-block text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    ✓ Feedback Recorded
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleReviewSubmit} className="space-y-5">
+                <div className="flex justify-between items-center border-b pb-3">
+                  <h3 className="font-bold text-lg text-slate-900">Review {reviewModalAppointment.doctor?.user?.name}</h3>
                   <button
                     type="button"
-                    key={star}
-                    onClick={() => setReviewRating(star)}
-                    className="p-2 rounded-xl border border-slate-200 hover:bg-amber-50"
+                    onClick={() => {
+                      setReviewModalAppointment(null);
+                      setReviewError("");
+                    }}
+                    className="p-1 rounded-full hover:bg-slate-100 text-slate-500"
                   >
-                    <Star className={`w-6 h-6 ${star <= reviewRating ? "text-amber-400 fill-amber-400" : "text-slate-300"}`} />
+                    ✕
                   </button>
-                ))}
-              </div>
-            </div>
+                </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-2">Your Experience / Feedback</label>
-              <textarea
-                required
-                rows={3}
-                value={reviewComment}
-                onChange={(e) => setReviewComment(e.target.value)}
-                placeholder="Doctor was very punctual and helpful..."
-                className="w-full p-3 text-xs border rounded-xl focus:ring-2 focus:ring-blue-500"
-              ></textarea>
-            </div>
+                {reviewError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{reviewError}</span>
+                  </div>
+                )}
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setReviewModalAppointment(null)}
-                className="w-1/2 py-2.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="w-1/2 py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl"
-              >
-                Submit Review
-              </button>
-            </div>
-          </form>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-2">Rating (1 to 5 Stars)</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => setReviewRating(star)}
+                        className="p-2 rounded-xl border border-slate-200 hover:bg-amber-50"
+                      >
+                        <Star className={`w-6 h-6 ${star <= reviewRating ? "text-amber-400 fill-amber-400" : "text-slate-300"}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-2">Your Experience / Feedback</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    placeholder="Doctor was very punctual and helpful..."
+                    className="w-full p-3 text-xs border rounded-xl focus:ring-2 focus:ring-blue-500"
+                  ></textarea>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReviewModalAppointment(null);
+                      setReviewError("");
+                    }}
+                    className="w-1/2 py-2.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submittingReview}
+                    className="w-1/2 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5"
+                  >
+                    {submittingReview ? "Submitting..." : "Submit Review"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       )}
     </div>

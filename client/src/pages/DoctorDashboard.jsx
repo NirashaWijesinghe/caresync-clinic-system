@@ -60,7 +60,8 @@ export default function DoctorDashboard() {
       fetchDoctorAppointments();
       setTimeout(() => setActionSuccess(""), 3000);
     } catch (err) {
-      alert("Failed to update consultation record");
+      setActionSuccess("❌ Failed to update consultation record. Please try again.");
+      setTimeout(() => setActionSuccess(""), 4000);
     }
   };
 
