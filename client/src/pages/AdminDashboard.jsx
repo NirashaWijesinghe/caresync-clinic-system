@@ -271,7 +271,7 @@ export default function AdminDashboard() {
       {/* Onboard New Doctor Modal */}
       {showAddDoctorModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleAddDoctorSubmit} className="bg-white rounded-3xl max-w-2xl w-full p-8 shadow-2xl border border-slate-100 space-y-5">
+          <form onSubmit={handleAddDoctorSubmit} autoComplete="off" className="bg-white rounded-3xl max-w-2xl w-full p-8 shadow-2xl border border-slate-100 space-y-5">
             <div className="flex justify-between items-center border-b pb-3">
               <div>
                 <span className="text-xs font-bold text-blue-600 uppercase">Doctor Management</span>
@@ -302,10 +302,11 @@ export default function AdminDashboard() {
                 <input
                   type="text"
                   required
+                  autoComplete="off"
                   value={newDoctorData.name}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, name: e.target.value })}
                   placeholder="e.g. Dr. Nihal Jayasinghe"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
                 />
               </div>
 
@@ -314,7 +315,7 @@ export default function AdminDashboard() {
                 <select
                   value={newDoctorData.specialtyId}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, specialtyId: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
                 >
                   {specialties.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>
@@ -327,10 +328,11 @@ export default function AdminDashboard() {
                 <input
                   type="email"
                   required
+                  autoComplete="new-email"
                   value={newDoctorData.email}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, email: e.target.value })}
                   placeholder="dr.nihal@caresync.com"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
                 />
               </div>
 
@@ -339,10 +341,11 @@ export default function AdminDashboard() {
                 <input
                   type="password"
                   required
+                  autoComplete="new-password"
                   value={newDoctorData.password}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, password: e.target.value })}
                   placeholder="doctor123"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
                 />
               </div>
 
@@ -350,10 +353,11 @@ export default function AdminDashboard() {
                 <label className="block font-bold text-slate-700 uppercase mb-1">Qualifications</label>
                 <input
                   type="text"
+                  autoComplete="off"
                   value={newDoctorData.qualifications}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, qualifications: e.target.value })}
                   placeholder="MBBS, MD (Cardiology)"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
                 />
               </div>
 
@@ -361,9 +365,10 @@ export default function AdminDashboard() {
                 <label className="block font-bold text-slate-700 uppercase mb-1">Consultation Fee (LKR)</label>
                 <input
                   type="number"
+                  required
                   value={newDoctorData.consultationFee}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, consultationFee: Number(e.target.value) })}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white"
                 />
               </div>
             </div>
