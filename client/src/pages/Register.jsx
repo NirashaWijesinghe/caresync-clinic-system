@@ -20,28 +20,85 @@ export default function Register() {
     confirmPassword: "",
     phone: ""
   });
+
+  const [touched, setTouched] = useState({});
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  // Real-time Field Validation Rules
+  const validate = () => {
+    const errors = {};
+
+    // 1. Name validation
+    if (!formData.name.trim()) {
+      if (touched.name) errors.name = "Full name is required.";
+    } else if (formData.name.trim().length < 2) {
+      errors.name = "Full name must be at least 2 characters long.";
+    }
+
+    // 2. Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      if (touched.email) errors.email = "Email address is required.";
+    } else if (!emailRegex.test(formData.email.trim())) {
+      errors.email = "Please enter a valid email (e.g. name@example.com).";
+    }
+
+    // 3. Phone validation (Optional, but strictly digits/format if provided)
+    if (formData.phone.trim()) {
+      const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{7,15}$/;
+      const hasAlpha = /[a-zA-Z]/.test(formData.phone);
+      if (hasAlpha || !phoneRegex.test(formData.phone.trim())) {
+        errors.phone = "Invalid phone number. Please enter digits only (e.g. 0771234567).";
+      }
+    }
+
+    // 4. Password validation
+    if (!formData.password) {
+      if (touched.password) errors.password = "Password is required.";
+    } else if (formData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters long.";
+    }
+
+    // 5. Confirm password validation
+    if (formData.confirmPassword || touched.confirmPassword) {
+      if (formData.password !== formData.confirmPassword) {
+        errors.confirmPassword = "Passwords do not match.";
+      }
+    }
+
+    return errors;
+  };
+
+  const errors = validate();
+
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
 
-    if (formData.name.trim().length < 2) {
-      setErrorMsg("Full name must be at least 2 characters long.");
-      return;
-    }
+    // Touch all fields on submit
+    setTouched({
+      name: true,
+      email: true,
+      phone: true,
+      password: true,
+      confirmPassword: true
+    });
 
-    if (formData.password.length < 6) {
-      setErrorMsg("Password must be at least 6 characters long.");
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setErrorMsg("Passwords do not match. Please re-enter.");
+    const formErrors = validate();
+    if (Object.keys(formErrors).length > 0) {
+      setErrorMsg("Please correct the highlighted errors in the form before submitting.");
       return;
     }
 
@@ -66,6 +123,7 @@ export default function Register() {
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-6">
+        {/* Top Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-teal-500 items-center justify-center text-white shadow-lg shadow-blue-500/20 mb-2">
             <HeartPulse className="w-7 h-7" />
@@ -78,109 +136,199 @@ export default function Register() {
           </p>
         </div>
 
+        {/* Card */}
         <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xl space-y-6">
           {errorMsg && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2 animate-in fade-in duration-200">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
+            {/* Full Name */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Full Name
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
+                <span>Full Name *</span>
+                {touched.name && !errors.name && formData.name.trim() && (
+                  <span className="text-[11px] text-emerald-600 flex items-center gap-0.5 font-semibold">
+                    <CheckCircle2 className="w-3 h-3" /> Valid
+                  </span>
+                )}
               </label>
               <div className="relative">
-                <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <User className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${errors.name ? "text-red-400" : "text-slate-400"}`} />
                 <input
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onBlur={() => handleBlur("name")}
+                  onChange={(e) => handleChange("name", e.target.value)}
                   placeholder="e.g. Kasun Silva"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                    errors.name
+                      ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
+                      : touched.name && formData.name.trim()
+                      ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
+                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  }`}
                 />
               </div>
+              {errors.name && (
+                <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                  {errors.name}
+                </p>
+              )}
             </div>
 
+            {/* Email Address */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Email Address
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
+                <span>Email Address *</span>
+                {touched.email && !errors.email && formData.email.trim() && (
+                  <span className="text-[11px] text-emerald-600 flex items-center gap-0.5 font-semibold">
+                    <CheckCircle2 className="w-3 h-3" /> Valid
+                  </span>
+                )}
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Mail className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${errors.email ? "text-red-400" : "text-slate-400"}`} />
                 <input
                   type="email"
                   required
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onBlur={() => handleBlur("email")}
+                  onChange={(e) => handleChange("email", e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                    errors.email
+                      ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
+                      : touched.email && formData.email.trim()
+                      ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
+                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  }`}
                 />
               </div>
+              {errors.email && (
+                <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                  {errors.email}
+                </p>
+              )}
             </div>
 
+            {/* Phone Number */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Phone Number (Optional)
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
+                <span>Phone Number (Optional)</span>
+                {formData.phone.trim() && !errors.phone && (
+                  <span className="text-[11px] text-emerald-600 flex items-center gap-0.5 font-semibold">
+                    <CheckCircle2 className="w-3 h-3" /> Valid
+                  </span>
+                )}
               </label>
               <div className="relative">
-                <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Phone className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${errors.phone ? "text-red-400" : "text-slate-400"}`} />
                 <input
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onBlur={() => handleBlur("phone")}
+                  onChange={(e) => handleChange("phone", e.target.value)}
                   placeholder="+94 77 123 4567"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                    errors.phone
+                      ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
+                      : formData.phone.trim() && !errors.phone
+                      ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
+                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  }`}
                 />
               </div>
+              {errors.phone && (
+                <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                  {errors.phone}
+                </p>
+              )}
             </div>
 
+            {/* Passwords (Side by side) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Password
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
+                  <span>Password *</span>
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                  <Lock className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${errors.password ? "text-red-400" : "text-slate-400"}`} />
                   <input
                     type="password"
                     required
                     minLength={6}
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onBlur={() => handleBlur("password")}
+                    onChange={(e) => handleChange("password", e.target.value)}
                     placeholder="Min 6 chars"
-                    className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                    className={`w-full pl-10 pr-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                      errors.password
+                        ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
+                        : touched.password && formData.password.length >= 6
+                        ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
+                        : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    }`}
                   />
                 </div>
+                {errors.password && (
+                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                    {errors.password}
+                  </p>
+                )}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Confirm Password
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
+                  <span>Confirm *</span>
+                  {formData.confirmPassword && !errors.confirmPassword && (
+                    <span className="text-[11px] text-emerald-600 flex items-center gap-0.5 font-semibold">
+                      <CheckCircle2 className="w-3 h-3" /> Match
+                    </span>
+                  )}
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                  <Lock className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${errors.confirmPassword ? "text-red-400" : "text-slate-400"}`} />
                   <input
                     type="password"
                     required
                     minLength={6}
                     value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    onBlur={() => handleBlur("confirmPassword")}
+                    onChange={(e) => handleChange("confirmPassword", e.target.value)}
                     placeholder="Re-enter password"
-                    className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                    className={`w-full pl-10 pr-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                      errors.confirmPassword
+                        ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
+                        : formData.confirmPassword && !errors.confirmPassword
+                        ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
+                        : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    }`}
                   />
                 </div>
+                {errors.confirmPassword && (
+                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                    {errors.confirmPassword}
+                  </p>
+                )}
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all hover:gap-3 disabled:opacity-50"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all hover:gap-3 disabled:opacity-50 mt-2"
             >
-              {loading ? "Registering..." : "Create Account"}
+              {loading ? "Creating Account..." : "Create Account"}
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

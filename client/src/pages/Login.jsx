@@ -10,12 +10,14 @@ import {
   Stethoscope,
   User,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  CheckCircle2
 } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [touched, setTouched] = useState({});
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -27,13 +29,24 @@ export default function Login() {
     ? location.state.from 
     : location.state?.from?.pathname || "/";
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = email.trim() && emailRegex.test(email.trim());
+  const emailError = touched.email && (!email.trim() ? "Email address is required." : !isEmailValid ? "Please enter a valid email address." : "");
+  const passwordError = touched.password && !password ? "Password is required." : "";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
+    setTouched({ email: true, password: true });
 
     const trimmedEmail = email.trim();
-    if (!trimmedEmail || !password) {
-      setErrorMsg("Please enter both email and password.");
+    if (!trimmedEmail || !isEmailValid) {
+      setErrorMsg("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password) {
+      setErrorMsg("Please enter your password.");
       return;
     }
 
@@ -57,6 +70,8 @@ export default function Login() {
 
   // Quick Demo Auto-fill Helper for Recruiters / Reviewers
   const fillDemoCredentials = (role) => {
+    setErrorMsg("");
+    setTouched({});
     if (role === "admin") {
       setEmail("admin@caresync.com");
       setPassword("admin123");
@@ -85,7 +100,7 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Demo Quick Access Card (Industry Standard Portfolio Feature) */}
+        {/* Demo Quick Access Card */}
         <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50/60 rounded-2xl border border-blue-200/80 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
@@ -130,30 +145,48 @@ export default function Login() {
         {/* Form Card */}
         <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xl space-y-6">
           {errorMsg && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2 animate-in fade-in duration-200">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+          <form onSubmit={handleSubmit} noValidate autoComplete="off" className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Email Address
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
+                <span>Email Address</span>
+                {touched.email && isEmailValid && (
+                  <span className="text-[11px] text-emerald-600 flex items-center gap-0.5 font-semibold">
+                    <CheckCircle2 className="w-3 h-3" /> Valid
+                  </span>
+                )}
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Mail className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${emailError ? "text-red-400" : "text-slate-400"}`} />
                 <input
                   type="email"
                   name="email"
                   required
                   autoComplete="off"
                   value={email}
+                  onBlur={() => setTouched((p) => ({ ...p, email: true }))}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                    emailError
+                      ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
+                      : touched.email && isEmailValid
+                      ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
+                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  }`}
                 />
               </div>
+              {emailError && (
+                <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                  {emailError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -161,24 +194,35 @@ export default function Login() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Lock className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${passwordError ? "text-red-400" : "text-slate-400"}`} />
                 <input
                   type="password"
                   name="password"
                   required
                   autoComplete="new-password"
                   value={password}
+                  onBlur={() => setTouched((p) => ({ ...p, password: true }))}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                    passwordError
+                      ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
+                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  }`}
                 />
               </div>
+              {passwordError && (
+                <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                  {passwordError}
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all hover:gap-3 disabled:opacity-50"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all hover:gap-3 disabled:opacity-50 mt-2"
             >
               {loading ? "Signing in..." : "Sign In to Account"}
               <ArrowRight className="w-4 h-4" />

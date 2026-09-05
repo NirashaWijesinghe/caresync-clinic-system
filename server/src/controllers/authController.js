@@ -16,6 +16,11 @@ const isValidEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
+const isValidPhone = (phone) => {
+  if (!phone || !phone.trim()) return true;
+  return /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{7,15}$/.test(phone.trim());
+};
+
 export const register = async (req, res) => {
   try {
     const { name, email, password, phone, role } = req.body;
@@ -30,6 +35,10 @@ export const register = async (req, res) => {
 
     if (!isValidEmail(email.trim())) {
       return res.status(400).json({ message: "Please provide a valid email address (e.g., name@example.com)." });
+    }
+
+    if (phone && !isValidPhone(phone)) {
+      return res.status(400).json({ message: "Please provide a valid phone number (e.g., 0771234567 or +94771234567)." });
     }
 
     if (password.length < 6) {
@@ -140,6 +149,10 @@ export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
     const { name, phone, avatar, bio, hospital, consultationFee } = req.body;
+
+    if (phone && !isValidPhone(phone)) {
+      return res.status(400).json({ message: "Please provide a valid phone number (e.g., 0771234567 or +94771234567)." });
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
