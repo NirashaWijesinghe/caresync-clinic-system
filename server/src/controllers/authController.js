@@ -148,10 +148,19 @@ export const getMe = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, phone, avatar, bio, hospital, consultationFee } = req.body;
+    const { name, phone, avatar, bio, hospital, consultationFee, qualifications, experienceYears } = req.body;
 
     if (phone && !isValidPhone(phone)) {
       return res.status(400).json({ message: "Please provide a valid phone number (e.g., 0771234567 or +94771234567)." });
+    }
+
+    if (req.user.role === "DOCTOR") {
+      if (experienceYears !== undefined && (isNaN(Number(experienceYears)) || Number(experienceYears) < 0)) {
+        return res.status(400).json({ message: "Experience years must be a valid non-negative number." });
+      }
+      if (consultationFee !== undefined && (isNaN(Number(consultationFee)) || Number(consultationFee) <= 0)) {
+        return res.status(400).json({ message: "Consultation fee must be a valid positive number." });
+      }
     }
 
     const updatedUser = await prisma.user.update({
@@ -174,20 +183,38 @@ export const updateProfile = async (req, res) => {
       }
     });
 
-    if (req.user.role === "DOCTOR" && (bio || hospital || consultationFee)) {
+    if (req.user.role === "DOCTOR") {
       await prisma.doctor.update({
         where: { userId },
         data: {
-          ...(bio && { bio: bio.trim() }),
-          ...(hospital && { hospital: hospital.trim() }),
-          ...(consultationFee && { consultationFee: Number(consultationFee) })
+          ...(bio !== undefined && { bio: bio.trim() }),
+          ...(hospital !== undefined && { hospital: hospital.trim() }),
+          ...(qualifications !== undefined && { qualifications: qualifications.trim() }),
+          ...(experienceYears !== undefined && { experienceYears: Number(experienceYears) }),
+          ...(consultationFee !== undefined && { consultationFee: Number(consultationFee) })
         }
       });
     }
 
+    // Refetch fresh profile with updated doctor details
+    const freshUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        phone: true,
+        avatar: true,
+        doctorProfile: {
+          include: { specialty: true }
+        }
+      }
+    });
+
     return res.status(200).json({
       message: "Profile updated successfully",
-      user: updatedUser
+      user: freshUser
     });
   } catch (error) {
     console.error("Update Profile Error:", error);

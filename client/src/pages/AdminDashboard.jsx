@@ -819,6 +819,27 @@ export default function AdminDashboard() {
                 )}
               </div>
 
+              {/* Experience Years */}
+              <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                  <span>Experience (Years) *</span>
+                  {Number(newDoctorData.experienceYears) >= 0 && (
+                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                      <CheckCircle2 className="w-3 h-3" /> Valid
+                    </span>
+                  )}
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={newDoctorData.experienceYears}
+                  onChange={(e) => setNewDoctorData({ ...newDoctorData, experienceYears: Number(e.target.value) })}
+                  placeholder="e.g. 6"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
               {/* Consultation Fee */}
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
@@ -850,6 +871,30 @@ export default function AdminDashboard() {
                     {docErrors.consultationFee}
                   </p>
                 )}
+              </div>
+
+              {/* Hospital / Clinic Wing */}
+              <div className="sm:col-span-2">
+                <label className="block font-bold text-slate-700 uppercase mb-1">Hospital / Clinic Wing</label>
+                <input
+                  type="text"
+                  value={newDoctorData.hospital}
+                  onChange={(e) => setNewDoctorData({ ...newDoctorData, hospital: e.target.value })}
+                  placeholder="CareSync Central Clinic, Colombo"
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Doctor Bio */}
+              <div className="sm:col-span-2">
+                <label className="block font-bold text-slate-700 uppercase mb-1">Doctor Bio</label>
+                <textarea
+                  rows={2}
+                  value={newDoctorData.bio}
+                  onChange={(e) => setNewDoctorData({ ...newDoctorData, bio: e.target.value })}
+                  placeholder="Short description of doctor's clinical expertise..."
+                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
+                ></textarea>
               </div>
             </div>
 

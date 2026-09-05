@@ -24,6 +24,8 @@ export default function ProfileModal({ isOpen, onClose }) {
   const [phone, setPhone] = useState(user?.phone || "");
   const [avatar, setAvatar] = useState(user?.avatar || "");
   const [bio, setBio] = useState(user?.doctorProfile?.bio || "");
+  const [qualifications, setQualifications] = useState(user?.doctorProfile?.qualifications || "MBBS, MD");
+  const [experienceYears, setExperienceYears] = useState(user?.doctorProfile?.experienceYears || 5);
   const [hospital, setHospital] = useState(user?.doctorProfile?.hospital || "");
   const [consultationFee, setConsultationFee] = useState(user?.doctorProfile?.consultationFee || 2500);
 
@@ -73,6 +75,11 @@ export default function ProfileModal({ isOpen, onClose }) {
         setErrorMsg("Consultation fee must be a valid positive number.");
         return;
       }
+      const expNum = Number(experienceYears);
+      if (isNaN(expNum) || expNum < 0) {
+        setErrorMsg("Experience years must be a valid non-negative number.");
+        return;
+      }
     }
 
     setSaving(true);
@@ -84,6 +91,8 @@ export default function ProfileModal({ isOpen, onClose }) {
         avatar: avatar ? avatar.trim() : undefined,
         ...(user.role === "DOCTOR" && {
           bio: bio ? bio.trim() : undefined,
+          qualifications: qualifications ? qualifications.trim() : undefined,
+          experienceYears: Number(experienceYears),
           hospital: hospital ? hospital.trim() : undefined,
           consultationFee: Number(consultationFee)
         })
@@ -233,9 +242,33 @@ export default function ProfileModal({ isOpen, onClose }) {
               </div>
             </div>
 
-            {/* Doctor Specific Fields */}
+            {/* Doctor Specific Professional Portfolio Fields */}
             {user.role === "DOCTOR" && (
               <div className="space-y-3 pt-2 border-t border-slate-100 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Qualifications</label>
+                    <input
+                      type="text"
+                      value={qualifications}
+                      onChange={(e) => setQualifications(e.target.value)}
+                      placeholder="e.g. MBBS, MD, MRCP"
+                      className="w-full p-2 rounded-xl border border-slate-300 text-xs font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Experience (Years)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={experienceYears}
+                      onChange={(e) => setExperienceYears(e.target.value)}
+                      placeholder="e.g. 8"
+                      className="w-full p-2 rounded-xl border border-slate-300 text-xs font-medium"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block font-bold text-slate-700 uppercase mb-1">Hospital / Clinic Wing</label>
