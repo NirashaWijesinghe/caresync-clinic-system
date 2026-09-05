@@ -1,4 +1,4 @@
-﻿import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -12,10 +12,10 @@ const formatTime12Hr = (time24) => {
 
 export const getAllDoctors = async (req, res) => {
   try {
-    const { specialtyId, search } = req.query;
+    const { specialtyId, search, includeInactive } = req.query;
 
     const whereClause = {
-      isActive: true,
+      ...(includeInactive !== "true" && { isActive: true }),
       ...(specialtyId && { specialtyId }),
       ...(search && {
         OR: [

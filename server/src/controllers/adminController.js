@@ -196,3 +196,35 @@ export const createSpecialty = async (req, res) => {
     return res.status(500).json({ message: "Failed to create specialty", error: error.message });
   }
 };
+
+export const toggleDoctorStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const doctor = await prisma.doctor.findUnique({
+      where: { id },
+      include: { user: { select: { name: true, email: true } } }
+    });
+
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    const updatedDoctor = await prisma.doctor.update({
+      where: { id },
+      data: { isActive: !doctor.isActive },
+      include: {
+        user: { select: { name: true, email: true, avatar: true } },
+        specialty: true
+      }
+    });
+
+    return res.status(200).json({
+      message: `Doctor ${updatedDoctor.user?.name} is now ${updatedDoctor.isActive ? "Active" : "Inactive"}`,
+      doctor: updatedDoctor
+    });
+  } catch (error) {
+    console.error("Toggle Doctor Status Error:", error);
+    return res.status(500).json({ message: "Failed to update doctor status", error: error.message });
+  }
+};
+

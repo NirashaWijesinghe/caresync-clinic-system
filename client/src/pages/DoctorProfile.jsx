@@ -169,6 +169,13 @@ export default function DoctorProfile() {
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
+            ) : !doctor.isActive ? (
+              <div className="flex flex-col items-end gap-1.5 mt-3">
+                <span className="px-4 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                  Temporarily Unavailable / On Leave
+                </span>
+              </div>
             ) : (
               <button
                 onClick={() => setModalOpen(true)}

@@ -54,6 +54,8 @@ export default function AdminDashboard() {
   });
   const [successMsg, setSuccessMsg] = useState("");
   const [doctorsList, setDoctorsList] = useState([]);
+  const [toggleModalDoc, setToggleModalDoc] = useState(null);
+  const [togglingStatus, setTogglingStatus] = useState(false);
 
   // Active Top Section Tab
   const [activeTab, setActiveTab] = useState("OVERVIEW"); // OVERVIEW, DOCTORS, APPOINTMENTS
@@ -78,7 +80,7 @@ export default function AdminDashboard() {
       const [statsRes, specRes, docRes] = await Promise.all([
         API.get("/admin/stats"),
         API.get("/doctors/specialties"),
-        API.get("/doctors")
+        API.get("/doctors?includeInactive=true")
       ]);
       setStats(statsRes.data);
       setSpecialties(specRes.data.specialties || []);
@@ -90,6 +92,25 @@ export default function AdminDashboard() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleConfirmToggleStatus = async () => {
+    if (!toggleModalDoc) return;
+    setTogglingStatus(true);
+    try {
+      const res = await API.patch(`/admin/doctors/${toggleModalDoc.id}/toggle-status`);
+      const updated = res.data.doctor;
+      setDoctorsList((prev) =>
+        prev.map((d) => (d.id === updated.id ? { ...d, isActive: updated.isActive } : d))
+      );
+      setSuccessMsg(res.data.message);
+      setTimeout(() => setSuccessMsg(""), 4000);
+      setToggleModalDoc(null);
+    } catch (err) {
+      console.error("Failed to toggle doctor status:", err);
+    } finally {
+      setTogglingStatus(false);
     }
   };
 
@@ -485,9 +506,23 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider">
-                          Active
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setToggleModalDoc(doc)}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold transition-all shadow-2xs cursor-pointer ${
+                            doc.isActive
+                              ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                              : "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
+                          }`}
+                          title={doc.isActive ? "Click to Deactivate / Suspend" : "Click to Reactivate Doctor"}
+                        >
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              doc.isActive ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
+                            }`}
+                          ></span>
+                          {doc.isActive ? "Active" : "Inactive"}
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -915,6 +950,83 @@ export default function AdminDashboard() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* SweetAlert Style Doctor Status Toggle Confirmation Modal */}
+      {toggleModalDoc && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-5 text-center">
+            <div
+              className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto ring-8 animate-pulse ${
+                toggleModalDoc.isActive
+                  ? "bg-rose-100 text-rose-600 ring-rose-50"
+                  : "bg-emerald-100 text-emerald-600 ring-emerald-50"
+              }`}
+            >
+              {toggleModalDoc.isActive ? (
+                <AlertCircle className="w-8 h-8" />
+              ) : (
+                <CheckCircle2 className="w-8 h-8" />
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-lg font-bold text-slate-900">
+                {toggleModalDoc.isActive ? "Deactivate Specialist?" : "Reactivate Specialist?"}
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to change the status of{" "}
+                <span className="font-bold text-slate-800">{toggleModalDoc.user?.name}</span> to{" "}
+                <span
+                  className={`font-extrabold ${
+                    toggleModalDoc.isActive ? "text-rose-600" : "text-emerald-600"
+                  }`}
+                >
+                  {toggleModalDoc.isActive ? "INACTIVE" : "ACTIVE"}
+                </span>
+                ?
+              </p>
+              <p
+                className={`text-[11px] p-2.5 rounded-xl border font-medium ${
+                  toggleModalDoc.isActive
+                    ? "text-rose-700 bg-rose-50 border-rose-200"
+                    : "text-emerald-700 bg-emerald-50 border-emerald-200"
+                }`}
+              >
+                {toggleModalDoc.isActive
+                  ? "Patients will not be able to book new consultations with this doctor until reactivated."
+                  : "This doctor's profile and consultation schedule will become live for patients immediately."}
+              </p>
+            </div>
+
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setToggleModalDoc(null)}
+                disabled={togglingStatus}
+                className="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmToggleStatus}
+                disabled={togglingStatus}
+                className={`w-1/2 py-2.5 text-white text-xs font-bold rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all ${
+                  toggleModalDoc.isActive
+                    ? "bg-rose-600 hover:bg-rose-700 shadow-rose-500/20"
+                    : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20"
+                }`}
+              >
+                {togglingStatus
+                  ? "Updating..."
+                  : toggleModalDoc.isActive
+                  ? "Yes, Deactivate"
+                  : "Yes, Activate"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
