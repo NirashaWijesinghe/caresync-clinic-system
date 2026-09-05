@@ -54,16 +54,22 @@ export default function AdminDashboard() {
   });
   const [successMsg, setSuccessMsg] = useState("");
   const [doctorsList, setDoctorsList] = useState([]);
+  const [patientsList, setPatientsList] = useState([]);
   const [toggleModalDoc, setToggleModalDoc] = useState(null);
   const [togglingStatus, setTogglingStatus] = useState(false);
 
   // Active Top Section Tab
-  const [activeTab, setActiveTab] = useState("OVERVIEW"); // OVERVIEW, DOCTORS, APPOINTMENTS
+  const [activeTab, setActiveTab] = useState("OVERVIEW"); // OVERVIEW, DOCTORS, PATIENTS, APPOINTMENTS
 
   // Doctor Table Search & Pagination
   const [doctorSearch, setDoctorSearch] = useState("");
   const [doctorPage, setDoctorPage] = useState(1);
   const DOCTORS_PER_PAGE = 5;
+
+  // Patient Table Search & Pagination
+  const [patientSearch, setPatientSearch] = useState("");
+  const [patientPage, setPatientPage] = useState(1);
+  const PATIENTS_PER_PAGE = 5;
 
   // Appointment Table Search & Pagination
   const [aptSearch, setAptSearch] = useState("");
@@ -77,14 +83,16 @@ export default function AdminDashboard() {
 
   const fetchAdminData = async () => {
     try {
-      const [statsRes, specRes, docRes] = await Promise.all([
+      const [statsRes, specRes, docRes, patRes] = await Promise.all([
         API.get("/admin/stats"),
         API.get("/doctors/specialties"),
-        API.get("/doctors?includeInactive=true")
+        API.get("/doctors?includeInactive=true"),
+        API.get("/admin/patients")
       ]);
       setStats(statsRes.data);
       setSpecialties(specRes.data.specialties || []);
       setDoctorsList(docRes.data.doctors || []);
+      setPatientsList(patRes.data.patients || []);
       if (specRes.data.specialties?.length > 0) {
         setNewDoctorData((prev) => ({ ...prev, specialtyId: specRes.data.specialties[0].id }));
       }
@@ -238,6 +246,22 @@ export default function AdminDashboard() {
     aptPage * APTS_PER_PAGE
   );
 
+  // Filtered & Paginated Patients
+  const filteredPatients = patientsList.filter((p) => {
+    if (!patientSearch.trim()) return true;
+    const q = patientSearch.toLowerCase();
+    return (
+      p.name?.toLowerCase().includes(q) ||
+      p.email?.toLowerCase().includes(q) ||
+      p.phone?.toLowerCase().includes(q)
+    );
+  });
+  const totalPatientPages = Math.ceil(filteredPatients.length / PATIENTS_PER_PAGE) || 1;
+  const paginatedPatients = filteredPatients.slice(
+    (patientPage - 1) * PATIENTS_PER_PAGE,
+    patientPage * PATIENTS_PER_PAGE
+  );
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Header */}
@@ -323,6 +347,20 @@ export default function AdminDashboard() {
         >
           <Stethoscope className="w-4 h-4" />
           Doctors Directory ({doctorsList.length})
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab("PATIENTS");
+            setPatientPage(1);
+          }}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
+            activeTab === "PATIENTS"
+              ? "bg-white text-blue-700 shadow-xs"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          Patients Directory ({patientsList.length})
         </button>
         <button
           onClick={() => {
@@ -560,7 +598,127 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* TAB 3: APPOINTMENTS FEED (PAGINATED & FILTERABLE) */}
+      {/* TAB 3: PATIENTS DIRECTORY (PAGINATED & SEARCHABLE) */}
+      {activeTab === "PATIENTS" && (
+        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden animate-in fade-in duration-200">
+          <div className="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-bold text-lg text-slate-900">Registered Patient Base</h3>
+              <p className="text-xs text-slate-400">All registered clinic patient accounts, contacts & consultation counts</p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="relative flex items-center bg-slate-50 rounded-xl border border-slate-200 px-3.5 py-1.5 focus-within:border-blue-500 focus-within:bg-white text-xs">
+                <Search className="w-4 h-4 text-slate-400 mr-2" />
+                <input
+                  type="text"
+                  placeholder="Search patient by name, email, or phone..."
+                  value={patientSearch}
+                  onChange={(e) => {
+                    setPatientSearch(e.target.value);
+                    setPatientPage(1);
+                  }}
+                  className="bg-transparent focus:outline-none text-slate-800 placeholder-slate-400 text-xs w-64"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            {paginatedPatients.length === 0 ? (
+              <div className="p-12 text-center text-xs text-slate-400">
+                No patient accounts matched your search query.
+              </div>
+            ) : (
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100">
+                  <tr>
+                    <th className="px-6 py-3.5">Patient Profile</th>
+                    <th className="px-6 py-3.5">Contact Phone</th>
+                    <th className="px-6 py-3.5">Registered Date</th>
+                    <th className="px-6 py-3.5">Consultations History</th>
+                    <th className="px-6 py-3.5 text-right">Account Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {paginatedPatients.map((pat) => (
+                    <tr key={pat.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={pat.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(pat.name)}`}
+                            alt={pat.name}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(pat.name || 'Patient')}&background=0D8ABC&color=fff&bold=true`;
+                            }}
+                            className="w-10 h-10 rounded-xl object-cover ring-2 ring-slate-100 flex-shrink-0"
+                          />
+                          <div>
+                            <p className="font-bold text-sm text-slate-900">{pat.name}</p>
+                            <p className="text-[11px] text-slate-400">{pat.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-600 font-medium">
+                        {pat.phone || <span className="text-slate-400 italic">Not Provided</span>}
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 font-medium">
+                        {new Date(pat.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric"
+                        })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                          <Activity className="w-3.5 h-3.5 text-blue-600" />
+                          {pat._count?.appointments || 0} Visits
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                          Active Patient
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPatientPages > 1 && (
+            <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50">
+              <span>
+                Showing Page <strong className="text-slate-900">{patientPage}</strong> of <strong>{totalPatientPages}</strong> ({filteredPatients.length} total)
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={patientPage <= 1}
+                  onClick={() => setPatientPage((p) => p - 1)}
+                  className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 font-semibold"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" /> Previous
+                </button>
+                <button
+                  type="button"
+                  disabled={patientPage >= totalPatientPages}
+                  onClick={() => setPatientPage((p) => p + 1)}
+                  className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 font-semibold"
+                >
+                  Next <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 4: APPOINTMENTS FEED (PAGINATED & FILTERABLE) */}
       {activeTab === "APPOINTMENTS" && (
         <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden animate-in fade-in duration-200">
           <div className="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">

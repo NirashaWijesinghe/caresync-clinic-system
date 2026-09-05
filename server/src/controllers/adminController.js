@@ -228,3 +228,32 @@ export const toggleDoctorStatus = async (req, res) => {
   }
 };
 
+export const getAllPatients = async (req, res) => {
+  try {
+    const patients = await prisma.user.findMany({
+      where: { role: "PATIENT" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        avatar: true,
+        createdAt: true,
+        _count: {
+          select: {
+            appointments: true,
+            reviews: true
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    return res.status(200).json({ patients });
+  } catch (error) {
+    console.error("Get All Patients Error:", error);
+    return res.status(500).json({ message: "Failed to fetch patients list", error: error.message });
+  }
+};
+
+
