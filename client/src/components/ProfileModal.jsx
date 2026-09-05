@@ -8,22 +8,13 @@ import {
   Camera,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
   Building,
   CreditCard,
   FileText,
   Loader2,
-  Upload
+  Upload,
+  Image as ImageIcon
 } from "lucide-react";
-
-const PRESET_AVATARS = [
-  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256",
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=256",
-  "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256",
-  "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=256",
-  "https://images.unsplash.com/photo-1614608682850-e0d6ed316d47?auto=format&fit=crop&q=80&w=256",
-  "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=256"
-];
 
 export default function ProfileModal({ isOpen, onClose }) {
   const { user, updateUser } = useAuth();
@@ -156,74 +147,58 @@ export default function ProfileModal({ isOpen, onClose }) {
               className="hidden"
             />
 
-            {/* Avatar Section with Clickable Camera Icon */}
-            <div className="space-y-3">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Profile Photo / Avatar
-              </label>
-
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                {/* Clickable Avatar Circle with Floating Camera Icon */}
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="relative group flex-shrink-0 cursor-pointer"
-                  title="Click to upload photo from your computer/device"
-                >
-                  <img
-                    src={avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256"}
-                    alt={name}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=2563eb&color=fff&bold=true`;
-                    }}
-                    className="w-20 h-20 rounded-3xl object-cover ring-4 ring-blue-500/20 shadow-md group-hover:opacity-90 transition-all"
-                  />
-                  
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-black/35 rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Upload className="w-6 h-6 text-white animate-bounce" />
-                  </div>
-
-                  {/* Floating Camera Button Badge */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fileInputRef.current?.click();
-                    }}
-                    className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg ring-2 ring-white transition-all transform group-hover:scale-110"
-                    title="Upload photo from device"
-                  >
-                    <Camera className="w-3.5 h-3.5" />
-                  </button>
+            {/* Avatar Section - Clean & Focused on Real Photo */}
+            <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/70 flex items-center gap-4">
+              {/* Clickable Avatar Circle with Floating Camera Icon */}
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="relative group flex-shrink-0 cursor-pointer"
+                title="Click to upload photo from your computer/device"
+              >
+                <img
+                  src={avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256"}
+                  alt={name}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=2563eb&color=fff&bold=true`;
+                  }}
+                  className="w-20 h-20 rounded-2xl object-cover ring-4 ring-blue-500/20 shadow-md group-hover:opacity-90 transition-all"
+                />
+                
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-black/35 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Upload className="w-6 h-6 text-white animate-bounce" />
                 </div>
 
-                {/* Preset Avatars & Upload Hint */}
-                <div className="flex-1 space-y-2 text-center sm:text-left">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-slate-500">
-                      Click camera to upload custom photo or pick preset:
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1 justify-center sm:justify-start">
-                    {PRESET_AVATARS.map((presetUrl, idx) => (
-                      <button
-                        type="button"
-                        key={idx}
-                        onClick={() => setAvatar(presetUrl)}
-                        className={`w-8 h-8 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
-                          avatar === presetUrl ? "border-blue-600 scale-110 shadow-xs" : "border-slate-200 hover:border-slate-400 opacity-80 hover:opacity-100"
-                        }`}
-                      >
-                        <img src={presetUrl} alt="preset" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
+                {/* Floating Camera Button Badge */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                  className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg ring-2 ring-white transition-all transform group-hover:scale-110"
+                  title="Upload photo from device"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
-                  <p className="text-[10px] text-slate-400">
-                    💡 Supports JPG, PNG, WEBP from your PC/Phone.
-                  </p>
+              {/* Upload Instruction & Action */}
+              <div className="flex-1 space-y-1">
+                <h4 className="text-xs font-bold text-slate-800">Profile Photo</h4>
+                <p className="text-[11px] text-slate-500">
+                  Click the camera icon or picture to upload your real photo from this device.
+                </p>
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3 py-1 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-lg text-xs font-semibold text-blue-600 shadow-2xs transition-all flex items-center gap-1.5"
+                  >
+                    <Camera className="w-3 h-3 text-blue-600" />
+                    Change Photo
+                  </button>
                 </div>
               </div>
             </div>
@@ -239,7 +214,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs font-medium"
                   />
                 </div>
               </div>
@@ -253,7 +228,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+94 77 123 4567"
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs font-medium"
                   />
                 </div>
               </div>
@@ -270,7 +245,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                       value={hospital}
                       onChange={(e) => setHospital(e.target.value)}
                       placeholder="CareSync Central Clinic, Colombo"
-                      className="w-full p-2 rounded-xl border border-slate-300 text-xs"
+                      className="w-full p-2 rounded-xl border border-slate-300 text-xs font-medium"
                     />
                   </div>
                   <div>
@@ -279,7 +254,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                       type="number"
                       value={consultationFee}
                       onChange={(e) => setConsultationFee(e.target.value)}
-                      className="w-full p-2 rounded-xl border border-slate-300 text-xs"
+                      className="w-full p-2 rounded-xl border border-slate-300 text-xs font-medium"
                     />
                   </div>
                 </div>
@@ -291,7 +266,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Short description of medical expertise..."
-                    className="w-full p-2 rounded-xl border border-slate-300 text-xs"
+                    className="w-full p-2 rounded-xl border border-slate-300 text-xs font-medium"
                   ></textarea>
                 </div>
               </div>
