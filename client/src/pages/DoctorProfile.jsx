@@ -10,7 +10,11 @@ import {
   Award,
   ShieldCheck,
   Stethoscope,
-  MessageSquare
+  MessageSquare,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Filter
 } from "lucide-react";
 
 export default function DoctorProfile() {
@@ -18,6 +22,11 @@ export default function DoctorProfile() {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Reviews Star Filter & Pagination
+  const [starFilter, setStarFilter] = useState("ALL");
+  const [reviewPage, setReviewPage] = useState(1);
+  const REVIEWS_PER_PAGE = 3;
 
   useEffect(() => {
     fetchDoctor();
@@ -53,6 +62,29 @@ export default function DoctorProfile() {
     );
   }
 
+  // Reviews Analysis & Distribution
+  const allReviews = doctor.reviews || [];
+  const totalReviewsCount = allReviews.length;
+
+  const starCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  allReviews.forEach((r) => {
+    if (starCounts[r.rating] !== undefined) {
+      starCounts[r.rating] += 1;
+    }
+  });
+
+  // Filtered Reviews
+  const filteredReviews = allReviews.filter((r) => {
+    if (starFilter === "ALL") return true;
+    return r.rating === Number(starFilter);
+  });
+
+  const totalReviewPages = Math.ceil(filteredReviews.length / REVIEWS_PER_PAGE) || 1;
+  const paginatedReviews = filteredReviews.slice(
+    (reviewPage - 1) * REVIEWS_PER_PAGE,
+    reviewPage * REVIEWS_PER_PAGE
+  );
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       {/* Profile Header Card */}
@@ -77,15 +109,15 @@ export default function DoctorProfile() {
             <p className="text-sm font-medium text-slate-600">{doctor.qualifications}</p>
 
             <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-slate-600">
-              <span className="flex items-center text-amber-500 font-bold gap-1 bg-amber-50 px-2.5 py-1 rounded-lg">
+              <span className="flex items-center text-amber-500 font-bold gap-1 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100">
                 <Star className="w-4 h-4 fill-amber-400" />
-                {doctor.rating?.toFixed(1) || "4.8"} ({doctor.reviews?.length || 0} reviews)
+                {doctor.rating?.toFixed(1) || "4.8"} ({totalReviewsCount} reviews)
               </span>
-              <span className="flex items-center gap-1.5 text-slate-600">
+              <span className="flex items-center gap-1.5 text-slate-600 font-semibold">
                 <Award className="w-4 h-4 text-blue-600" />
                 {doctor.experienceYears}+ Years Clinical Experience
               </span>
-              <span className="flex items-center gap-1.5 text-slate-600">
+              <span className="flex items-center gap-1.5 text-slate-600 font-medium">
                 <MapPin className="w-4 h-4 text-slate-400" />
                 {doctor.hospital}
               </span>
@@ -133,44 +165,196 @@ export default function DoctorProfile() {
         <p className="text-sm text-slate-600 leading-relaxed">{doctor.bio}</p>
       </div>
 
-      {/* Patient Reviews */}
+      {/* Patient Feedback & Reviews (Enterprise Widget with Breakdown & Pagination) */}
       <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-blue-600" />
-            Patient Feedback & Reviews
-          </h3>
-          <span className="text-xs font-semibold text-slate-500">
-            {doctor.reviews?.length || 0} Verified Reviews
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
+          <div>
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Clinical Reputation</span>
+            <h3 className="font-bold text-xl text-slate-900 flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-blue-600" />
+              Patient Feedback & Reviews
+            </h3>
+          </div>
+          <span className="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100 self-start sm:self-auto">
+            {totalReviewsCount} Verified Patient Reviews
           </span>
         </div>
 
-        <div className="space-y-4">
-          {doctor.reviews?.length > 0 ? (
-            doctor.reviews.map((rev) => (
-              <div key={rev.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <img
-                      src={rev.patient?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256"}
-                      alt={rev.patient?.name}
-                      className="w-7 h-7 rounded-full object-cover"
+        {totalReviewsCount > 0 ? (
+          <div className="space-y-6">
+            {/* Rating Breakdown Summary Card */}
+            <div className="p-6 bg-gradient-to-br from-slate-50 to-blue-50/40 rounded-2xl border border-slate-200/80 flex flex-col md:flex-row items-center gap-8">
+              {/* Left Score Card */}
+              <div className="text-center md:text-left flex flex-col items-center md:items-start flex-shrink-0">
+                <span className="text-4xl font-extrabold text-slate-900 tracking-tight">
+                  {doctor.rating?.toFixed(1) || "4.8"}
+                </span>
+                <div className="flex items-center gap-1 my-1.5 text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${
+                        i < Math.round(doctor.rating || 5)
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-slate-300"
+                      }`}
                     />
-                    <span className="font-bold text-xs text-slate-800">{rev.patient?.name}</span>
-                  </div>
-                  <div className="flex items-center text-amber-500 text-xs">
-                    {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
-                    ))}
-                  </div>
+                  ))}
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">{rev.comment}</p>
+                <p className="text-xs text-slate-500 font-medium">Based on {totalReviewsCount} consultations</p>
               </div>
-            ))
-          ) : (
-            <p className="text-xs text-slate-400">No reviews yet for this consultant.</p>
-          )}
-        </div>
+
+              {/* Right Star Distribution Bars */}
+              <div className="flex-1 w-full space-y-2">
+                {[5, 4, 3, 2, 1].map((star) => {
+                  const count = starCounts[star] || 0;
+                  const percent = totalReviewsCount > 0 ? Math.round((count / totalReviewsCount) * 100) : 0;
+                  return (
+                    <div key={star} className="flex items-center gap-3 text-xs">
+                      <span className="w-12 text-slate-600 font-semibold flex items-center gap-1 flex-shrink-0">
+                        {star} <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      </span>
+                      <div className="flex-1 h-2 bg-slate-200/80 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500"
+                          style={{ width: `${percent}%` }}
+                        ></div>
+                      </div>
+                      <span className="w-8 text-right font-medium text-slate-500 text-[11px] flex-shrink-0">
+                        {count}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Star Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              <span className="text-xs font-bold text-slate-500 flex items-center gap-1 mr-1">
+                <Filter className="w-3.5 h-3.5" /> Filter:
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setStarFilter("ALL");
+                  setReviewPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  starFilter === "ALL"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                All ({totalReviewsCount})
+              </button>
+              {[5, 4, 3, 2, 1].map((star) => {
+                const count = starCounts[star] || 0;
+                if (count === 0 && starFilter !== String(star)) return null;
+                return (
+                  <button
+                    type="button"
+                    key={star}
+                    onClick={() => {
+                      setStarFilter(String(star));
+                      setReviewPage(1);
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+                      starFilter === String(star)
+                        ? "bg-amber-500 text-white shadow-sm"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    <span>{star}</span>
+                    <Star className="w-3 h-3 fill-current" />
+                    <span>({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Paginated Reviews List */}
+            <div className="space-y-3 pt-2">
+              {paginatedReviews.length > 0 ? (
+                paginatedReviews.map((rev) => (
+                  <div
+                    key={rev.id}
+                    className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2.5 hover:border-slate-300 transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={
+                            rev.patient?.avatar ||
+                            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256"
+                          }
+                          alt={rev.patient?.name}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                              rev.patient?.name || "Patient"
+                            )}&background=2563eb&color=fff&bold=true`;
+                          }}
+                          className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200"
+                        />
+                        <div>
+                          <span className="font-bold text-xs text-slate-900 block">{rev.patient?.name}</span>
+                          <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                            <ShieldCheck className="w-3 h-3" /> Verified Consultation
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center text-amber-500 text-xs bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">
+                        {[...Array(rev.rating)].map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-700 leading-relaxed font-normal">{rev.comment}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="p-8 text-center bg-slate-50 rounded-2xl text-xs text-slate-500">
+                  No reviews found matching the selected star filter.
+                </div>
+              )}
+            </div>
+
+            {/* Review Pagination Controls */}
+            {totalReviewPages > 1 && (
+              <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/60 flex items-center justify-between text-xs text-slate-600">
+                <span>
+                  Showing Page <strong className="text-slate-900">{reviewPage}</strong> of{" "}
+                  <strong>{totalReviewPages}</strong> ({filteredReviews.length} reviews)
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={reviewPage <= 1}
+                    onClick={() => setReviewPage((p) => p - 1)}
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 font-semibold"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                  </button>
+                  <button
+                    type="button"
+                    disabled={reviewPage >= totalReviewPages}
+                    onClick={() => setReviewPage((p) => p + 1)}
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 font-semibold"
+                  >
+                    Next <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="p-12 text-center bg-slate-50 rounded-2xl space-y-2">
+            <MessageSquare className="w-8 h-8 text-slate-300 mx-auto" />
+            <p className="text-xs font-semibold text-slate-600">No patient feedback yet</p>
+            <p className="text-[11px] text-slate-400">Reviews will appear here once patients complete consultations.</p>
+          </div>
+        )}
       </div>
 
       {/* Booking Modal */}

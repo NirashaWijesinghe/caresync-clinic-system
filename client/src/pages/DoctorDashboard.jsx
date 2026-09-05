@@ -11,7 +11,10 @@ import {
   Activity,
   AlertCircle,
   Users,
-  Search
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 export default function DoctorDashboard() {
@@ -22,6 +25,12 @@ export default function DoctorDashboard() {
   const [diagnosisNotes, setDiagnosisNotes] = useState("");
   const [prescription, setPrescription] = useState("");
   const [actionSuccess, setActionSuccess] = useState("");
+
+  // Queue Filters & Pagination
+  const [queueFilter, setQueueFilter] = useState("ALL"); // ALL, CONFIRMED, COMPLETED, CANCELLED
+  const [searchQuery, setSearchQuery] = useState("");
+  const [queuePage, setQueuePage] = useState(1);
+  const QUEUE_PER_PAGE = 5;
 
   useEffect(() => {
     fetchDoctorAppointments();
@@ -79,11 +88,30 @@ export default function DoctorDashboard() {
 
   const confirmedCount = appointments.filter((a) => a.status === "CONFIRMED").length;
   const completedCount = appointments.filter((a) => a.status === "COMPLETED").length;
+  const cancelledCount = appointments.filter((a) => a.status === "CANCELLED").length;
+
+  // Filtered Queue
+  const filteredAppointments = appointments.filter((apt) => {
+    const matchesFilter = queueFilter === "ALL" || apt.status === queueFilter;
+    const term = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !term ||
+      apt.patient?.name?.toLowerCase().includes(term) ||
+      apt.patient?.phone?.toLowerCase().includes(term) ||
+      apt.patient?.email?.toLowerCase().includes(term);
+    return matchesFilter && matchesSearch;
+  });
+
+  const totalPages = Math.ceil(filteredAppointments.length / QUEUE_PER_PAGE) || 1;
+  const paginatedAppointments = filteredAppointments.slice(
+    (queuePage - 1) * QUEUE_PER_PAGE,
+    queuePage * QUEUE_PER_PAGE
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-teal-600 to-blue-700 p-8 rounded-3xl text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="bg-gradient-to-r from-teal-600 via-teal-700 to-blue-700 p-8 rounded-3xl text-white shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <span className="text-xs font-bold text-teal-100 uppercase tracking-wider">Doctor Clinical Portal</span>
           <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">{user?.name}</h1>
@@ -94,9 +122,9 @@ export default function DoctorDashboard() {
       </div>
 
       {actionSuccess && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-xl flex items-center justify-between">
-          <span>{actionSuccess}</span>
-          <button onClick={() => setActionSuccess("")} className="text-emerald-900 font-bold">✕</button>
+        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-2xl flex items-center justify-between shadow-xs animate-in fade-in">
+          <span className="font-semibold">{actionSuccess}</span>
+          <button onClick={() => setActionSuccess("")} className="text-emerald-900 font-bold p-1 hover:bg-emerald-100 rounded-lg">✕</button>
         </div>
       )}
 
@@ -110,7 +138,7 @@ export default function DoctorDashboard() {
           color="blue"
         />
         <StatCard
-          title="Pending / Today's Queue"
+          title="Pending / Waiting Queue"
           value={confirmedCount}
           subtitle="Patients awaiting consultation"
           icon={Clock}
@@ -125,30 +153,116 @@ export default function DoctorDashboard() {
         />
       </div>
 
-      {/* Appointments Queue Table */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="font-bold text-lg text-slate-900">Patient Queue & Schedules</h3>
-          <span className="text-xs font-semibold text-slate-500">{appointments.length} Records</span>
+      {/* Appointments Queue Table Card */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden space-y-4 p-6">
+        {/* Card Header & Controls */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div>
+            <h3 className="font-bold text-lg text-slate-900">Patient Queue & Schedules</h3>
+            <p className="text-xs text-slate-500">Live consultation queue with status filters and search</p>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative w-full md:w-72">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setQueuePage(1);
+              }}
+              placeholder="Search patient name, phone..."
+              className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+            />
+          </div>
         </div>
 
+        {/* Status Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <button
+            type="button"
+            onClick={() => {
+              setQueueFilter("ALL");
+              setQueuePage(1);
+            }}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              queueFilter === "ALL"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            All Consultations ({appointments.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setQueueFilter("CONFIRMED");
+              setQueuePage(1);
+            }}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              queueFilter === "CONFIRMED"
+                ? "bg-teal-600 text-white shadow-xs"
+                : "bg-teal-50 text-teal-700 hover:bg-teal-100"
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            Waiting / Queue ({confirmedCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setQueueFilter("COMPLETED");
+              setQueuePage(1);
+            }}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              queueFilter === "COMPLETED"
+                ? "bg-blue-600 text-white shadow-xs"
+                : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+            }`}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Completed ({completedCount})
+          </button>
+          {cancelledCount > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setQueueFilter("CANCELLED");
+                setQueuePage(1);
+              }}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                queueFilter === "CANCELLED"
+                  ? "bg-rose-600 text-white shadow-xs"
+                  : "bg-rose-50 text-rose-700 hover:bg-rose-100"
+              }`}
+            >
+              Cancelled ({cancelledCount})
+            </button>
+          )}
+        </div>
+
+        {/* Queue Items */}
         {loading ? (
           <div className="p-8 text-center text-xs text-slate-400">Loading patient schedule...</div>
-        ) : appointments.length === 0 ? (
-          <div className="p-12 text-center text-xs text-slate-400">No appointments assigned yet.</div>
+        ) : filteredAppointments.length === 0 ? (
+          <div className="p-12 text-center bg-slate-50 rounded-2xl space-y-1">
+            <p className="text-xs font-bold text-slate-700">No consultations found in this queue</p>
+            <p className="text-[11px] text-slate-400">Try changing the filter or search query.</p>
+          </div>
         ) : (
-          <div className="divide-y divide-slate-100">
-            {appointments.map((apt) => (
-              <div key={apt.id} className="p-6 hover:bg-slate-50/70 transition-colors flex flex-col md:flex-row justify-between gap-6 items-start md:items-center">
+          <div className="divide-y divide-slate-100 border border-slate-100 rounded-2xl overflow-hidden">
+            {paginatedAppointments.map((apt) => (
+              <div key={apt.id} className="p-5 hover:bg-slate-50/70 transition-colors flex flex-col md:flex-row justify-between gap-6 items-start md:items-center">
                 <div className="flex gap-4 items-start">
                   <img
                     src={apt.patient?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256"}
                     alt={apt.patient?.name}
-                    className="w-12 h-12 rounded-2xl object-cover ring-2 ring-slate-100"
+                    className="w-12 h-12 rounded-2xl object-cover ring-2 ring-slate-100 flex-shrink-0"
                   />
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-base text-slate-900">{apt.patient?.name}</h4>
+                      <h4 className="font-bold text-sm text-slate-900">{apt.patient?.name}</h4>
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
                           apt.status === "CONFIRMED"
@@ -162,7 +276,7 @@ export default function DoctorDashboard() {
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                       <span className="flex items-center gap-1 font-semibold text-slate-700">
                         <Calendar className="w-3.5 h-3.5 text-blue-500" />
                         {apt.appointmentDate}
@@ -193,6 +307,33 @@ export default function DoctorDashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Queue Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="pt-3 flex items-center justify-between text-xs text-slate-500">
+            <span>
+              Showing Page <strong className="text-slate-900">{queuePage}</strong> of <strong>{totalPages}</strong> ({filteredAppointments.length} total)
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={queuePage <= 1}
+                onClick={() => setQueuePage((p) => p - 1)}
+                className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 font-semibold"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" /> Previous
+              </button>
+              <button
+                type="button"
+                disabled={queuePage >= totalPages}
+                onClick={() => setQueuePage((p) => p + 1)}
+                className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 font-semibold"
+              >
+                Next <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
       </div>
