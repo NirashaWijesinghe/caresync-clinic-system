@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
@@ -18,7 +18,8 @@ app.use(cors({
   origin: "*", // allow all in dev / set specific domain in prod
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(morgan("dev"));
 
 // Health check endpoint
