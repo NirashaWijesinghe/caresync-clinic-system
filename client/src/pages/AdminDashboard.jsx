@@ -99,9 +99,40 @@ export default function AdminDashboard() {
   const handleAddDoctorSubmit = async (e) => {
     e.preventDefault();
     setDoctorModalError("");
+
+    if (newDoctorData.name.trim().length < 2) {
+      setDoctorModalError("Doctor full name must be at least 2 characters long.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newDoctorData.email.trim())) {
+      setDoctorModalError("Please enter a valid email address (e.g. dr.name@caresync.com).");
+      return;
+    }
+
+    if (newDoctorData.password.length < 6) {
+      setDoctorModalError("Temporary password must be at least 6 characters long.");
+      return;
+    }
+
+    const feeNum = Number(newDoctorData.consultationFee);
+    if (isNaN(feeNum) || feeNum <= 0) {
+      setDoctorModalError("Consultation fee must be a valid positive number.");
+      return;
+    }
+
     setAddingDoctor(true);
     try {
-      await API.post("/admin/doctors", newDoctorData);
+      await API.post("/admin/doctors", {
+        ...newDoctorData,
+        name: newDoctorData.name.trim(),
+        email: newDoctorData.email.trim(),
+        consultationFee: feeNum,
+        experienceYears: Number(newDoctorData.experienceYears) || 0,
+        hospital: newDoctorData.hospital.trim(),
+        bio: newDoctorData.bio.trim()
+      });
       setSuccessMsg("New doctor onboarded successfully!");
       setShowAddDoctorModal(false);
       fetchAdminData();

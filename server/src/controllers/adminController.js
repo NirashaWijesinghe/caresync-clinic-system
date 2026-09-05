@@ -1,4 +1,4 @@
-﻿import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -78,6 +78,10 @@ export const getAdminStats = async (req, res) => {
   }
 };
 
+const isValidEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
 export const createDoctor = async (req, res) => {
   try {
     const {
@@ -97,7 +101,29 @@ export const createDoctor = async (req, res) => {
     } = req.body;
 
     if (!name || !email || !password || !specialtyId) {
-      return res.status(400).json({ message: "Name, email, password, and specialty are required" });
+      return res.status(400).json({ message: "Doctor Name, Email, Password, and Specialty are required." });
+    }
+
+    if (name.trim().length < 2) {
+      return res.status(400).json({ message: "Doctor's full name must be at least 2 characters long." });
+    }
+
+    if (!isValidEmail(email.trim())) {
+      return res.status(400).json({ message: "Please provide a valid email address (e.g., dr.name@caresync.com)." });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Temporary password must be at least 6 characters long." });
+    }
+
+    const feeNum = Number(consultationFee);
+    if (isNaN(feeNum) || feeNum <= 0) {
+      return res.status(400).json({ message: "Consultation fee must be a valid positive number (e.g. 2500)." });
+    }
+
+    const expNum = Number(experienceYears);
+    if (isNaN(expNum) || expNum < 0) {
+      return res.status(400).json({ message: "Experience years must be a valid non-negative number." });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -105,7 +131,7 @@ export const createDoctor = async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: "Email already registered" });
+      return res.status(400).json({ message: "An account with this email is already registered in the system." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

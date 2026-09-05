@@ -1,4 +1,4 @@
-﻿import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -9,7 +9,15 @@ export const createAppointment = async (req, res) => {
 
     if (!doctorId || !appointmentDate || !appointmentTime) {
       return res.status(400).json({
-        message: "Doctor, appointment date, and appointment time are required"
+        message: "Doctor, appointment date, and appointment time are required."
+      });
+    }
+
+    // Validate that appointment date is today or a future date
+    const todayStr = new Date().toISOString().split("T")[0];
+    if (appointmentDate < todayStr) {
+      return res.status(400).json({
+        message: "Cannot book an appointment for a past date. Please select today or a future date."
       });
     }
 
@@ -143,12 +151,23 @@ export const updateAppointmentDetails = async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
+    const trimmedDiagnosis = diagnosisNotes !== undefined ? diagnosisNotes.trim() : undefined;
+    const trimmedPrescription = prescription !== undefined ? prescription.trim() : undefined;
+
+    if (trimmedDiagnosis !== undefined && trimmedDiagnosis.length > 0 && trimmedDiagnosis.length < 3) {
+      return res.status(400).json({ message: "Diagnosis notes must be at least 3 characters long." });
+    }
+
+    if (trimmedPrescription !== undefined && trimmedPrescription.length > 0 && trimmedPrescription.length < 3) {
+      return res.status(400).json({ message: "Prescription must be at least 3 characters long." });
+    }
+
     const updated = await prisma.appointment.update({
       where: { id },
       data: {
         ...(status && { status }),
-        ...(diagnosisNotes !== undefined && { diagnosisNotes }),
-        ...(prescription !== undefined && { prescription })
+        ...(trimmedDiagnosis !== undefined && { diagnosisNotes: trimmedDiagnosis }),
+        ...(trimmedPrescription !== undefined && { prescription: trimmedPrescription })
       },
       include: {
         doctor: {
@@ -203,15 +222,24 @@ export const createReview = async (req, res) => {
     const patientId = req.user.id;
     const { doctorId, rating, comment } = req.body;
 
-    if (!doctorId || !rating || !comment) {
-      return res.status(400).json({ message: "Doctor, rating (1-5), and review comment required" });
+    if (!doctorId || rating === undefined || !comment) {
+      return res.status(400).json({ message: "Doctor, star rating (1-5), and review comment are required." });
+    }
+
+    const numRating = Number(rating);
+    if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {
+      return res.status(400).json({ message: "Rating must be an integer between 1 and 5 stars." });
+    }
+
+    if (comment.trim().length < 3) {
+      return res.status(400).json({ message: "Review comment must be at least 3 characters long." });
     }
 
     const review = await prisma.review.create({
       data: {
         patientId,
         doctorId,
-        rating: Number(rating),
+        rating: numRating,
         comment: comment.trim()
       }
     });

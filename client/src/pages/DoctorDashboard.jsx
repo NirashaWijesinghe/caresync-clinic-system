@@ -48,6 +48,18 @@ export default function DoctorDashboard() {
     e.preventDefault();
     if (!activeConsultation) return;
 
+    if (diagnosisNotes.trim().length < 3) {
+      setActionSuccess("❌ Diagnosis notes must be at least 3 characters long.");
+      setTimeout(() => setActionSuccess(""), 4000);
+      return;
+    }
+
+    if (prescription.trim().length < 3) {
+      setActionSuccess("❌ Digital Prescription must be at least 3 characters long.");
+      setTimeout(() => setActionSuccess(""), 4000);
+      return;
+    }
+
     try {
       await API.patch(`/appointments/${activeConsultation.id}/details`, {
         status: "COMPLETED",

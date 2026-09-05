@@ -42,15 +42,33 @@ export default function ProfileModal({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setErrorMsg("");
+
+    if (name.trim().length < 2) {
+      setErrorMsg("Full name must be at least 2 characters long.");
+      return;
+    }
+
+    if (user.role === "DOCTOR") {
+      const feeNum = Number(consultationFee);
+      if (isNaN(feeNum) || feeNum <= 0) {
+        setErrorMsg("Consultation fee must be a valid positive number.");
+        return;
+      }
+    }
+
+    setSaving(true);
 
     try {
       const payload = {
-        name,
-        phone,
-        avatar,
-        ...(user.role === "DOCTOR" && { bio, hospital, consultationFee })
+        name: name.trim(),
+        phone: phone ? phone.trim() : null,
+        avatar: avatar ? avatar.trim() : undefined,
+        ...(user.role === "DOCTOR" && {
+          bio: bio ? bio.trim() : undefined,
+          hospital: hospital ? hospital.trim() : undefined,
+          consultationFee: Number(consultationFee)
+        })
       };
 
       const res = await API.patch("/auth/profile", payload);
