@@ -53,19 +53,23 @@ export default function PatientDashboard() {
     }
   };
 
-  const [reviewError, setReviewError] = useState("");
-  const [submittingReview, setSubmittingReview] = useState(false);
+  const [cancelModalApt, setCancelModalApt] = useState(null);
+  const [cancelling, setCancelling] = useState(false);
 
-  const handleCancel = async (id) => {
-    if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
+  const handleConfirmCancel = async () => {
+    if (!cancelModalApt) return;
+    setCancelling(true);
     try {
-      await API.patch(`/appointments/${id}/cancel`);
-      setActionMsg("Appointment cancelled successfully");
+      await API.patch(`/appointments/${cancelModalApt.id}/cancel`);
+      setActionMsg("✓ Appointment cancelled successfully");
+      setCancelModalApt(null);
       fetchAppointments();
       setTimeout(() => setActionMsg(""), 3500);
     } catch (err) {
       setActionMsg(err.response?.data?.message || "Failed to cancel appointment");
       setTimeout(() => setActionMsg(""), 3500);
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -267,7 +271,7 @@ export default function PatientDashboard() {
 
                   {apt.status === "CONFIRMED" && (
                     <button
-                      onClick={() => handleCancel(apt.id)}
+                      onClick={() => setCancelModalApt(apt)}
                       className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl flex items-center gap-1 transition-colors"
                     >
                       <XCircle className="w-3.5 h-3.5" />
@@ -425,6 +429,46 @@ export default function PatientDashboard() {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* SweetAlert Style Cancel Confirmation Modal */}
+      {cancelModalApt && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-5 text-center">
+            <div className="w-14 h-14 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-rose-50 animate-pulse">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-lg font-bold text-slate-900">Cancel Consultation?</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to cancel your appointment with <span className="font-bold text-slate-700">{cancelModalApt.doctor?.user?.name}</span> on <span className="font-semibold text-slate-700">{cancelModalApt.appointmentDate}</span> at <span className="font-semibold text-slate-700">{cancelModalApt.appointmentTime}</span>?
+              </p>
+              <p className="text-[11px] text-amber-600 bg-amber-50 p-2 rounded-xl border border-amber-200 font-medium">
+                This time slot will be released back to the clinic pool.
+              </p>
+            </div>
+
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setCancelModalApt(null)}
+                disabled={cancelling}
+                className="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors"
+              >
+                Nevermind, Keep
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancel}
+                disabled={cancelling}
+                className="w-1/2 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md shadow-rose-500/20 flex items-center justify-center gap-1.5 transition-all"
+              >
+                {cancelling ? "Cancelling..." : "Yes, Cancel"}
+              </button>
+            </div>
           </div>
         </div>
       )}
