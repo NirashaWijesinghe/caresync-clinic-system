@@ -147,13 +147,13 @@ export default function ProfileModal({ isOpen, onClose }) {
               className="hidden"
             />
 
-            {/* Avatar Section - Clean & Focused on Real Photo */}
-            <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/70 flex items-center gap-4">
+            {/* Avatar & User Header - Minimalist & Sleek */}
+            <div className="flex items-center gap-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-200/60">
               {/* Clickable Avatar Circle with Floating Camera Icon */}
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className="relative group flex-shrink-0 cursor-pointer"
-                title="Click to upload photo from your computer/device"
+                title="Change Photo"
               >
                 <img
                   src={avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256"}
@@ -162,12 +162,12 @@ export default function ProfileModal({ isOpen, onClose }) {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=2563eb&color=fff&bold=true`;
                   }}
-                  className="w-20 h-20 rounded-2xl object-cover ring-4 ring-blue-500/20 shadow-md group-hover:opacity-90 transition-all"
+                  className="w-16 h-16 rounded-2xl object-cover ring-2 ring-white shadow-md group-hover:opacity-90 transition-all"
                 />
                 
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-black/35 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Upload className="w-6 h-6 text-white animate-bounce" />
+                  <Upload className="w-5 h-5 text-white" />
                 </div>
 
                 {/* Floating Camera Button Badge */}
@@ -177,29 +177,28 @@ export default function ProfileModal({ isOpen, onClose }) {
                     e.stopPropagation();
                     fileInputRef.current?.click();
                   }}
-                  className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg ring-2 ring-white transition-all transform group-hover:scale-110"
-                  title="Upload photo from device"
+                  className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-md ring-2 ring-white transition-all transform group-hover:scale-110"
+                  title="Change Photo"
                 >
-                  <Camera className="w-3.5 h-3.5" />
+                  <Camera className="w-3 h-3" />
                 </button>
               </div>
 
-              {/* Upload Instruction & Action */}
-              <div className="flex-1 space-y-1">
-                <h4 className="text-xs font-bold text-slate-800">Profile Photo</h4>
-                <p className="text-[11px] text-slate-500">
-                  Click the camera icon or picture to upload your real photo from this device.
-                </p>
-                <div className="pt-1">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-3 py-1 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-lg text-xs font-semibold text-blue-600 shadow-2xs transition-all flex items-center gap-1.5"
-                  >
-                    <Camera className="w-3 h-3 text-blue-600" />
-                    Change Photo
-                  </button>
+              {/* User Identity Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h4 className="font-bold text-sm text-slate-900 truncate">{name || user.name}</h4>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                    user.role === "ADMIN"
+                      ? "bg-purple-100 text-purple-700 border border-purple-200"
+                      : user.role === "DOCTOR"
+                      ? "bg-teal-100 text-teal-700 border border-teal-200"
+                      : "bg-blue-100 text-blue-700 border border-blue-200"
+                  }`}>
+                    {user.role}
+                  </span>
                 </div>
+                <p className="text-xs text-slate-500 truncate">{user.email}</p>
               </div>
             </div>
 
