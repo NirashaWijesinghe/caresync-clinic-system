@@ -115,8 +115,16 @@ export default function PatientDashboard() {
     }
   };
 
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
   const upcomingCount = appointments.filter((a) => a.status === "CONFIRMED").length;
   const completedCount = appointments.filter((a) => a.status === "COMPLETED").length;
+  const cancelledCount = appointments.filter((a) => a.status === "CANCELLED").length;
+
+  const filteredAppointments = appointments.filter((apt) => {
+    if (statusFilter === "ALL") return true;
+    return apt.status === statusFilter;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -172,30 +180,86 @@ export default function PatientDashboard() {
 
       {/* Appointments List */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-          <h3 className="font-bold text-lg text-slate-900">Your Appointment History</h3>
-          <span className="text-xs font-semibold text-slate-500">{appointments.length} Consultations</span>
+        <div className="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="font-bold text-lg text-slate-900">Your Appointment History</h3>
+            <p className="text-xs text-slate-400">All medical visits, e-prescriptions, and consultation records</p>
+          </div>
+
+          {/* Status Filter Tabs (Industry Standard) */}
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => setStatusFilter("ALL")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                statusFilter === "ALL"
+                  ? "bg-white text-slate-900 shadow-2xs"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
+            >
+              All ({appointments.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("CONFIRMED")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                statusFilter === "CONFIRMED"
+                  ? "bg-white text-emerald-700 shadow-2xs"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
+            >
+              Upcoming ({upcomingCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("COMPLETED")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                statusFilter === "COMPLETED"
+                  ? "bg-white text-blue-700 shadow-2xs"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
+            >
+              Completed ({completedCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("CANCELLED")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                statusFilter === "CANCELLED"
+                  ? "bg-white text-rose-700 shadow-2xs"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
+            >
+              Cancelled ({cancelledCount})
+            </button>
+          </div>
         </div>
 
         {loading ? (
           <div className="p-8 text-center text-xs text-slate-400">Loading your appointments...</div>
-        ) : appointments.length === 0 ? (
+        ) : filteredAppointments.length === 0 ? (
           <div className="p-12 text-center space-y-3">
             <Calendar className="w-10 h-10 text-slate-300 mx-auto" />
-            <h4 className="text-base font-bold text-slate-700">No Appointments Scheduled</h4>
+            <h4 className="text-base font-bold text-slate-700">
+              No {statusFilter === "ALL" ? "" : statusFilter.toLowerCase()} appointments found
+            </h4>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              You haven't booked any medical consultations yet. Browse our specialist directory to find a doctor.
+              {statusFilter === "ALL"
+                ? "You haven't booked any medical consultations yet. Browse our specialist directory to find a doctor."
+                : `You currently have zero ${statusFilter.toLowerCase()} consultations in this category.`}
             </p>
-            <Link
-              to="/doctors"
-              className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl"
-            >
-              Browse Specialists
-            </Link>
+            {statusFilter === "ALL" && (
+              <Link
+                to="/doctors"
+                className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl"
+              >
+                Browse Specialists
+              </Link>
+            )}
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
-            {appointments.map((apt) => (
+            {filteredAppointments.map((apt) => (
               <div key={apt.id} className="p-6 hover:bg-slate-50/70 transition-colors flex flex-col md:flex-row justify-between gap-6 items-start md:items-center">
                 {/* Doctor & Info */}
                 <div className="flex gap-4 items-start">
