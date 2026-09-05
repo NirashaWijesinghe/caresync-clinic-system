@@ -143,7 +143,7 @@ export const createDoctor = async (req, res) => {
         password: hashedPassword,
         phone: phone || null,
         role: "DOCTOR",
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`
+        avatar: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=400"
       }
     });
 
