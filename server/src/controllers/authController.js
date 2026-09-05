@@ -1,4 +1,4 @@
-﻿import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 
@@ -117,5 +117,51 @@ export const getMe = async (req, res) => {
     return res.status(200).json({ user: req.user });
   } catch (error) {
     return res.status(500).json({ message: "Failed to retrieve user profile" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, phone, avatar, bio, hospital, consultationFee } = req.body;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(name && { name: name.trim() }),
+        ...(phone !== undefined && { phone: phone ? phone.trim() : null }),
+        ...(avatar && { avatar: avatar.trim() })
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        phone: true,
+        avatar: true,
+        doctorProfile: {
+          include: { specialty: true }
+        }
+      }
+    });
+
+    if (req.user.role === "DOCTOR" && (bio || hospital || consultationFee)) {
+      await prisma.doctor.update({
+        where: { userId },
+        data: {
+          ...(bio && { bio: bio.trim() }),
+          ...(hospital && { hospital: hospital.trim() }),
+          ...(consultationFee && { consultationFee: Number(consultationFee) })
+        }
+      });
+    }
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+    return res.status(500).json({ message: "Failed to update profile", error: error.message });
   }
 };

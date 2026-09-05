@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import ProfileModal from "./ProfileModal";
 import {
   HeartPulse,
   User,
@@ -11,7 +12,8 @@ import {
   X,
   Stethoscope,
   ShieldCheck,
-  ArrowRight
+  ArrowRight,
+  Settings
 } from "lucide-react";
 
 export default function Navbar() {
@@ -19,6 +21,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -35,97 +38,121 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-18">
-          {/* Brand Logo */}
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/20 group-hover:bg-blue-700 transition-colors">
-              <HeartPulse className="w-6 h-6" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-xl tracking-tight text-slate-900 flex items-center">
-                Care<span className="text-blue-600">Sync</span>
-              </span>
-              <span className="text-[10px] text-slate-400 font-bold -mt-0.5 tracking-wider uppercase">
-                Healthcare Network
-              </span>
-            </div>
-          </Link>
-
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/"
-              className={`text-sm font-semibold transition-colors ${
-                isActive("/")
-                  ? "text-blue-600 font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Home
-            </Link>
-            <Link
-              to="/doctors"
-              className={`text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-                isActive("/doctors")
-                  ? "text-blue-600 font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <Stethoscope className="w-4 h-4 text-blue-500" />
-              Find Specialists
+    <>
+      <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-18">
+            {/* Brand Logo */}
+            <Link to="/" className="flex items-center space-x-3 group">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/20 group-hover:bg-blue-700 transition-colors">
+                <HeartPulse className="w-6 h-6" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-extrabold text-xl tracking-tight text-slate-900 flex items-center">
+                  Care<span className="text-blue-600">Sync</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-bold -mt-0.5 tracking-wider uppercase">
+                  Healthcare Network
+                </span>
+              </div>
             </Link>
 
-            {user && (
+            {/* Desktop Nav Links */}
+            <nav className="hidden md:flex items-center space-x-8">
               <Link
-                to={getDashboardPath()}
-                className={`text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-                  location.pathname.includes("dashboard") || location.pathname === "/admin"
+                to="/"
+                className={`text-sm font-semibold transition-colors ${
+                  isActive("/")
                     ? "text-blue-600 font-bold"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                {user.role === "ADMIN" ? (
-                  <ShieldCheck className="w-4 h-4 text-purple-600" />
-                ) : user.role === "DOCTOR" ? (
-                  <Calendar className="w-4 h-4 text-teal-600" />
-                ) : (
-                  <LayoutDashboard className="w-4 h-4 text-blue-600" />
-                )}
-                {user.role === "ADMIN"
-                  ? "Admin Portal"
-                  : user.role === "DOCTOR"
-                  ? "Doctor Schedule"
-                  : "My Appointments"}
+                Home
               </Link>
-            )}
-          </nav>
+              <Link
+                to="/doctors"
+                className={`text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+                  isActive("/doctors")
+                    ? "text-blue-600 font-bold"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <Stethoscope className="w-4 h-4 text-blue-500" />
+                Find Specialists
+              </Link>
 
-          {/* Right Action / Profile */}
-          <div className="hidden md:flex items-center space-x-3">
-            {user ? (
-              <div className="flex items-center space-x-3 pl-4 border-l border-slate-200">
-                <img
-                  src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}`}
-                  alt={user.name}
-                  className="w-9 h-9 rounded-full ring-2 ring-blue-100 object-cover"
-                />
-                <div className="text-left">
-                  <p className="text-xs font-bold text-slate-900 leading-tight">{user.name}</p>
-                  <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-50 text-blue-700 uppercase">
-                    {user.role}
-                  </span>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  title="Sign Out"
-                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors ml-1"
+              {user && (
+                <Link
+                  to={getDashboardPath()}
+                  className={`text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+                    location.pathname.includes("dashboard") || location.pathname === "/admin"
+                      ? "text-blue-600 font-bold"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
                 >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
+                  {user.role === "ADMIN" ? (
+                    <ShieldCheck className="w-4 h-4 text-purple-600" />
+                  ) : user.role === "DOCTOR" ? (
+                    <Calendar className="w-4 h-4 text-teal-600" />
+                  ) : (
+                    <LayoutDashboard className="w-4 h-4 text-blue-600" />
+                  )}
+                  {user.role === "ADMIN"
+                    ? "Admin Portal"
+                    : user.role === "DOCTOR"
+                    ? "Doctor Schedule"
+                    : "My Appointments"}
+                </Link>
+              )}
+            </nav>
+
+            {/* Right Action / Profile */}
+            <div className="hidden md:flex items-center space-x-3">
+              {user ? (
+                <div className="flex items-center space-x-3 pl-4 border-l border-slate-200">
+                  <button
+                    onClick={() => setProfileModalOpen(true)}
+                    className="flex items-center space-x-2.5 p-1 rounded-xl hover:bg-slate-50 transition-all text-left group"
+                    title="Click to edit profile & avatar"
+                  >
+                    <div className="relative">
+                      <img
+                        src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}`}
+                        alt={user.name}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=2563eb&color=fff&bold=true`;
+                        }}
+                        className="w-9 h-9 rounded-xl ring-2 ring-blue-100 object-cover group-hover:ring-blue-400 transition-all"
+                      />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
+                        {user.name}
+                      </p>
+                      <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-50 text-blue-700 uppercase">
+                        {user.role}
+                      </span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => setProfileModalOpen(true)}
+                    title="Profile Settings"
+                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={handleLogout}
+                    title="Sign Out"
+                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
               <div className="flex items-center space-x-3">
                 <Link
                   to="/login"
@@ -213,5 +240,14 @@ export default function Navbar() {
         </div>
       )}
     </header>
+
+    {/* Account Profile & Avatar Modal */}
+    {profileModalOpen && (
+      <ProfileModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+      />
+    )}
+  </>
   );
 }

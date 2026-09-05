@@ -15,7 +15,8 @@ import {
   Plus,
   Stethoscope,
   Activity,
-  Receipt
+  Receipt,
+  Printer
 } from "lucide-react";
 
 export default function PatientDashboard() {
@@ -399,10 +400,19 @@ export default function PatientDashboard() {
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 flex gap-2.5">
               <button
+                type="button"
+                onClick={() => window.print()}
+                className="w-1/2 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                Print / Save PDF
+              </button>
+              <button
+                type="button"
                 onClick={() => setSelectedPrescription(null)}
-                className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl"
+                className="w-1/2 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-colors"
               >
                 Close Record
               </button>

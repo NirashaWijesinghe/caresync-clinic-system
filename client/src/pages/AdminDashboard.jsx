@@ -48,18 +48,22 @@ export default function AdminDashboard() {
   });
   const [successMsg, setSuccessMsg] = useState("");
 
+  const [doctorsList, setDoctorsList] = useState([]);
+
   useEffect(() => {
     fetchAdminData();
   }, []);
 
   const fetchAdminData = async () => {
     try {
-      const [statsRes, specRes] = await Promise.all([
+      const [statsRes, specRes, docRes] = await Promise.all([
         API.get("/admin/stats"),
-        API.get("/doctors/specialties")
+        API.get("/doctors/specialties"),
+        API.get("/doctors")
       ]);
       setStats(statsRes.data);
       setSpecialties(specRes.data.specialties || []);
+      setDoctorsList(docRes.data.doctors || []);
       if (specRes.data.specialties?.length > 0) {
         setNewDoctorData((prev) => ({ ...prev, specialtyId: specRes.data.specialties[0].id }));
       }
@@ -265,6 +269,84 @@ export default function AdminDashboard() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Consultant Doctors Directory Table */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="font-bold text-lg text-slate-900">Active Medical Specialists</h3>
+            <p className="text-xs text-slate-400">All registered consultants, consultation fees, and hospital locations</p>
+          </div>
+          <button
+            onClick={() => setShowAddDoctorModal(true)}
+            className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors self-start sm:self-auto"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            + Onboard Doctor
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-100">
+              <tr>
+                <th className="px-6 py-3.5">Doctor & Contact</th>
+                <th className="px-6 py-3.5">Specialty</th>
+                <th className="px-6 py-3.5">Hospital / Clinic Wing</th>
+                <th className="px-6 py-3.5">Fee</th>
+                <th className="px-6 py-3.5">Rating</th>
+                <th className="px-6 py-3.5 text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {doctorsList.map((doc) => (
+                <tr key={doc.id} className="hover:bg-slate-50/70 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={doc.user?.avatar || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256"}
+                        alt={doc.user?.name}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(doc.user?.name || 'Doctor')}&background=2563eb&color=fff&bold=true`;
+                        }}
+                        className="w-10 h-10 rounded-xl object-cover ring-2 ring-slate-100"
+                      />
+                      <div>
+                        <Link to={`/doctors/${doc.id}`} className="font-bold text-sm text-slate-900 hover:text-blue-600 transition-colors">
+                          {doc.user?.name}
+                        </Link>
+                        <p className="text-[11px] text-slate-400">{doc.user?.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                      {doc.specialty?.name}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-slate-600 font-medium">
+                    {doc.hospital}
+                  </td>
+                  <td className="px-6 py-4 font-bold text-slate-900">
+                    LKR {doc.consultationFee?.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center gap-1 font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">
+                      ★ {doc.rating?.toFixed(1) || "4.8"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider">
+                      Active
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
