@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import API from "../services/api";
 import AppointmentModal from "../components/AppointmentModal";
 import {
@@ -14,11 +15,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
-  Filter
+  Filter,
+  ArrowRight
 } from "lucide-react";
 
 export default function DoctorProfile() {
   const { id } = useParams();
+  const { user } = useAuth();
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -131,12 +134,49 @@ export default function DoctorProfile() {
                 LKR {doctor.consultationFee?.toLocaleString()}
               </span>
             </div>
-            <button
-              onClick={() => setModalOpen(true)}
-              className="mt-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-2xl shadow-md shadow-blue-500/25 transition-all"
-            >
-              Book Consultation
-            </button>
+
+            {/* Dynamic Role-Based Action */}
+            {user?.role === "DOCTOR" && (user?.id === doctor.userId || user?.id === doctor.user?.id) ? (
+              <div className="flex flex-col items-end gap-1.5 mt-3">
+                <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-md">
+                  Your Public Profile Mode
+                </span>
+                <Link
+                  to="/doctor/dashboard"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-md shadow-teal-500/20 transition-all"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Go to Live Queue
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            ) : user?.role === "DOCTOR" ? (
+              <div className="flex flex-col items-end gap-1.5 mt-3">
+                <div className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-200">
+                  <Stethoscope className="w-3.5 h-3.5 text-blue-500" />
+                  Specialist Colleague View
+                </div>
+              </div>
+            ) : user?.role === "ADMIN" ? (
+              <div className="flex flex-col items-end gap-1.5 mt-3">
+                <Link
+                  to="/admin"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold rounded-2xl shadow-md shadow-purple-500/20 transition-all"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Manage in Admin Portal
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            ) : (
+              <button
+                onClick={() => setModalOpen(true)}
+                className="mt-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-2xl shadow-md shadow-blue-500/25 transition-all flex items-center gap-2"
+              >
+                <Calendar className="w-4 h-4" />
+                Book Consultation
+              </button>
+            )}
           </div>
         </div>
 

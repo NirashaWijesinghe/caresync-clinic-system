@@ -1,8 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Star, MapPin, Calendar, Clock, ArrowRight, Award, ShieldCheck } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { Star, MapPin, Calendar, Clock, ArrowRight, Award, ShieldCheck, Stethoscope } from "lucide-react";
 
 export default function DoctorCard({ doctor, onBookNow }) {
+  const { user } = useAuth();
+
+  const isOwnDoctorProfile =
+    user?.role === "DOCTOR" &&
+    (user?.id === doctor.userId || user?.id === doctor.user?.id);
+  const isDoctor = user?.role === "DOCTOR";
+  const isAdmin = user?.role === "ADMIN";
+
   return (
     <div className="clinic-card overflow-hidden flex flex-col group">
       <div className="p-6 flex-1 flex flex-col">
@@ -82,13 +91,39 @@ export default function DoctorCard({ doctor, onBookNow }) {
           >
             Profile
           </Link>
-          <button
-            onClick={() => onBookNow ? onBookNow(doctor) : null}
-            className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl shadow-xs shadow-blue-500/20 flex items-center gap-1.5 transition-all group-hover:shadow-sm"
-          >
-            Book Slot
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+
+          {isOwnDoctorProfile ? (
+            <Link
+              to="/doctor/dashboard"
+              className="text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-2xs"
+            >
+              My Queue
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          ) : isDoctor ? (
+            <Link
+              to={`/doctors/${doctor.id}`}
+              className="text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1"
+            >
+              View Info
+            </Link>
+          ) : isAdmin ? (
+            <Link
+              to="/admin"
+              className="text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-2xs"
+            >
+              Manage
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          ) : (
+            <button
+              onClick={() => onBookNow ? onBookNow(doctor) : null}
+              className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl shadow-xs shadow-blue-500/20 flex items-center gap-1.5 transition-all group-hover:shadow-sm"
+            >
+              Book Slot
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
     </div>
