@@ -73,6 +73,14 @@ export default function PatientDashboard() {
     }
   };
 
+  const handleOpenReviewModal = (apt) => {
+    setReviewSuccess(false);
+    setReviewError("");
+    setReviewComment("");
+    setReviewRating(5);
+    setReviewModalAppointment(apt);
+  };
+
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!reviewModalAppointment) return;
@@ -80,8 +88,9 @@ export default function PatientDashboard() {
     setSubmittingReview(true);
 
     try {
+      const docId = reviewModalAppointment.doctorId || reviewModalAppointment.doctor?.id;
       await API.post("/appointments/reviews", {
-        doctorId: reviewModalAppointment.doctorId,
+        doctorId: docId,
         rating: reviewRating,
         comment: reviewComment
       });
@@ -259,8 +268,8 @@ export default function PatientDashboard() {
                         </span>
                       ) : (
                         <button
-                          onClick={() => setReviewModalAppointment(apt)}
-                          className="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl flex items-center gap-1 transition-colors"
+                          onClick={() => handleOpenReviewModal(apt)}
+                          className="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl flex items-center gap-1 transition-colors shadow-2xs hover:shadow-xs"
                         >
                           <Star className="w-3.5 h-3.5 fill-amber-400" />
                           Rate Doctor
