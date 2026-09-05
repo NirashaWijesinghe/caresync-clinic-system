@@ -30,10 +30,17 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
+      setErrorMsg("Please enter both email and password.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const loggedUser = await login(email, password);
+      const loggedUser = await login(trimmedEmail, password);
       if (loggedUser.role === "ADMIN") {
         navigate("/admin");
       } else if (loggedUser.role === "DOCTOR") {

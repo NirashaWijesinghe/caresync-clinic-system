@@ -12,12 +12,28 @@ const generateToken = (userId) => {
   );
 };
 
+const isValidEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
 export const register = async (req, res) => {
   try {
     const { name, email, password, phone, role } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "Name, email, and password are required" });
+      return res.status(400).json({ message: "Name, email, and password are required." });
+    }
+
+    if (name.trim().length < 2) {
+      return res.status(400).json({ message: "Full name must be at least 2 characters long." });
+    }
+
+    if (!isValidEmail(email.trim())) {
+      return res.status(400).json({ message: "Please provide a valid email address (e.g., name@example.com)." });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long." });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -25,7 +41,7 @@ export const register = async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: "Email is already registered" });
+      return res.status(400).json({ message: "An account with this email is already registered." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -36,9 +52,9 @@ export const register = async (req, res) => {
         name: name.trim(),
         email: email.toLowerCase().trim(),
         password: hashedPassword,
-        phone: phone || null,
+        phone: phone ? phone.trim() : null,
         role: assignedRole,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name.trim())}`
       },
       select: {
         id: true,
