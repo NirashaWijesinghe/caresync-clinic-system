@@ -51,9 +51,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`================================================`);
-  console.log(`🚀 CareSync Backend API running on port ${PORT}`);
-  console.log(`🏥 Health Check: http://localhost:${PORT}/api/health`);
-  console.log(`================================================`);
-});
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`================================================`);
+    console.log(`🚀 CareSync Backend API running on port ${PORT}`);
+    console.log(`🏥 Health Check: http://localhost:${PORT}/api/health`);
+    console.log(`================================================`);
+  });
+}
+
+export default app;
