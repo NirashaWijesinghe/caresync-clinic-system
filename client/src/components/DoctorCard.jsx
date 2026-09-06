@@ -43,10 +43,16 @@ export default function DoctorCard({ doctor, onBookNow }) {
             <p className="text-xs text-slate-500 truncate font-medium">{doctor.qualifications}</p>
 
             <div className="flex items-center gap-2.5 mt-2 text-xs">
-              <span className="flex items-center text-amber-600 font-bold gap-1 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                {doctor.rating?.toFixed(1) || "4.8"}
-              </span>
+              {(doctor._count?.reviews > 0 || (doctor.reviews && doctor.reviews.length > 0)) ? (
+                <span className="flex items-center text-amber-600 font-bold gap-1 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  {doctor.rating?.toFixed(1) || "5.0"}
+                </span>
+              ) : (
+                <span className="inline-flex items-center text-blue-700 font-semibold text-[11px] bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                  New Doctor
+                </span>
+              )}
               <span className="flex items-center gap-1 text-slate-500 font-medium text-[11px]">
                 <Award className="w-3.5 h-3.5 text-blue-500" />
                 {doctor.experienceYears}+ yrs exp

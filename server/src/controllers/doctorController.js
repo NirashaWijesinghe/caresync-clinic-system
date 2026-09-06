@@ -71,6 +71,11 @@ export const getDoctorById = async (req, res) => {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
+    if (doctor.reviews && doctor.reviews.length > 0) {
+      const avg = doctor.reviews.reduce((acc, r) => acc + r.rating, 0) / doctor.reviews.length;
+      doctor.rating = Number(avg.toFixed(1));
+    }
+
     return res.status(200).json({ doctor });
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch doctor details", error: error.message });

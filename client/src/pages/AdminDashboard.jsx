@@ -46,11 +46,11 @@ export default function AdminDashboard() {
     password: "",
     phone: "",
     specialtyId: "",
-    qualifications: "MBBS, MD",
-    experienceYears: 6,
-    consultationFee: 3000,
-    hospital: "CareSync Central Clinic, Colombo",
-    bio: "Dedicated specialist committed to patient wellness."
+    qualifications: "",
+    experienceYears: "",
+    consultationFee: "",
+    hospital: "",
+    bio: ""
   });
   const [successMsg, setSuccessMsg] = useState("");
   const [doctorsList, setDoctorsList] = useState([]);
@@ -539,9 +539,15 @@ export default function AdminDashboard() {
                         LKR {doc.consultationFee?.toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center gap-1 font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">
-                          ★ {doc.rating?.toFixed(1) || "4.8"}
-                        </span>
+                        {(doc._count?.reviews > 0 || (doc.reviews && doc.reviews.length > 0)) ? (
+                          <span className="inline-flex items-center gap-1 font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md text-xs">
+                            ★ {doc.rating?.toFixed(1) || "5.0"} ({doc._count?.reviews || doc.reviews?.length})
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-xs italic">
+                            No reviews
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button
@@ -995,7 +1001,7 @@ export default function AdminDashboard() {
                   value={newDoctorData.qualifications}
                   onBlur={() => setDoctorModalTouched((p) => ({ ...p, qualifications: true }))}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, qualifications: e.target.value })}
-                  placeholder="MBBS, MD (Cardiology)"
+                  placeholder="e.g. MBBS, MS (Orthopedics), FRCS"
                   className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
                     docErrors.qualifications
                       ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
@@ -1016,7 +1022,7 @@ export default function AdminDashboard() {
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
                   <span>Experience (Years) *</span>
-                  {Number(newDoctorData.experienceYears) >= 0 && (
+                  {newDoctorData.experienceYears !== "" && Number(newDoctorData.experienceYears) >= 0 && (
                     <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
                       <CheckCircle2 className="w-3 h-3" /> Valid
                     </span>
@@ -1027,8 +1033,8 @@ export default function AdminDashboard() {
                   required
                   min="0"
                   value={newDoctorData.experienceYears}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, experienceYears: Number(e.target.value) })}
-                  placeholder="e.g. 6"
+                  onChange={(e) => setNewDoctorData({ ...newDoctorData, experienceYears: e.target.value })}
+                  placeholder="e.g. 8"
                   className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -1037,7 +1043,7 @@ export default function AdminDashboard() {
               <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
                   <span>Consultation Fee (LKR) *</span>
-                  {Number(newDoctorData.consultationFee) > 0 && (
+                  {newDoctorData.consultationFee !== "" && Number(newDoctorData.consultationFee) > 0 && (
                     <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
                       <CheckCircle2 className="w-3 h-3" /> Valid
                     </span>
@@ -1049,11 +1055,12 @@ export default function AdminDashboard() {
                   min="500"
                   value={newDoctorData.consultationFee}
                   onBlur={() => setDoctorModalTouched((p) => ({ ...p, consultationFee: true }))}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, consultationFee: Number(e.target.value) })}
+                  onChange={(e) => setNewDoctorData({ ...newDoctorData, consultationFee: e.target.value })}
+                  placeholder="e.g. 3500"
                   className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
                     docErrors.consultationFee
                       ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
-                      : Number(newDoctorData.consultationFee) > 0
+                      : newDoctorData.consultationFee !== "" && Number(newDoctorData.consultationFee) > 0
                       ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
                       : "border-slate-300 focus:ring-2 focus:ring-blue-500"
                   }`}
@@ -1073,7 +1080,7 @@ export default function AdminDashboard() {
                   type="text"
                   value={newDoctorData.hospital}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, hospital: e.target.value })}
-                  placeholder="CareSync Central Clinic, Colombo"
+                  placeholder="e.g. CareSync Central Clinic, Colombo"
                   className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -1085,7 +1092,7 @@ export default function AdminDashboard() {
                   rows={2}
                   value={newDoctorData.bio}
                   onChange={(e) => setNewDoctorData({ ...newDoctorData, bio: e.target.value })}
-                  placeholder="Short description of doctor's clinical expertise..."
+                  placeholder="e.g. Senior specialist with extensive clinical experience..."
                   className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
                 ></textarea>
               </div>

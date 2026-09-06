@@ -4,70 +4,77 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding CareSync Healthcare Database...");
+  console.log("🌱 Safely Seeding CareSync Healthcare Database (No Data Deletion)...");
 
-  // Clear existing records
-  await prisma.review.deleteMany({});
-  await prisma.appointment.deleteMany({});
-  await prisma.doctor.deleteMany({});
-  await prisma.specialty.deleteMany({});
-  await prisma.user.deleteMany({});
-
-  // 1. Create Specialties
-  const cardiology = await prisma.specialty.create({
-    data: {
+  // 1. Create or Update Specialties (Upsert by name)
+  const cardiology = await prisma.specialty.upsert({
+    where: { name: "Cardiology" },
+    update: {},
+    create: {
       name: "Cardiology",
       description: "Heart and cardiovascular system care and disease management.",
       icon: "HeartPulse"
     }
   });
 
-  const dermatology = await prisma.specialty.create({
-    data: {
+  const dermatology = await prisma.specialty.upsert({
+    where: { name: "Dermatology" },
+    update: {},
+    create: {
       name: "Dermatology",
       description: "Skin, hair, nail treatments and cosmetic skincare.",
       icon: "Sparkles"
     }
   });
 
-  const neurology = await prisma.specialty.create({
-    data: {
+  const neurology = await prisma.specialty.upsert({
+    where: { name: "Neurology" },
+    update: {},
+    create: {
       name: "Neurology",
       description: "Brain, spinal cord, and nervous system disorders.",
       icon: "Activity"
     }
   });
 
-  const pediatrics = await prisma.specialty.create({
-    data: {
+  const pediatrics = await prisma.specialty.upsert({
+    where: { name: "Pediatrics" },
+    update: {},
+    create: {
       name: "Pediatrics",
       description: "Medical care for infants, children, and adolescents.",
       icon: "Baby"
     }
   });
 
-  const orthopedics = await prisma.specialty.create({
-    data: {
+  const orthopedics = await prisma.specialty.upsert({
+    where: { name: "Orthopedics" },
+    update: {},
+    create: {
       name: "Orthopedics",
       description: "Bones, joints, ligaments, tendons, and muscles.",
       icon: "ShieldPlus"
     }
   });
 
-  const generalMedicine = await prisma.specialty.create({
-    data: {
+  const generalMedicine = await prisma.specialty.upsert({
+    where: { name: "General Medicine" },
+    update: {},
+    create: {
       name: "General Medicine",
       description: "Comprehensive primary healthcare and routine checkups.",
       icon: "Stethoscope"
     }
   });
 
-  console.log("✅ Created 6 Specialties");
+  console.log("✅ Specialties verified & ready");
 
-  // 2. Create Admin User
+  // 2. Ensure Admin User Exists (Upsert by email)
   const adminPassword = await bcrypt.hash("admin123", 10);
-  const admin = await prisma.user.create({
-    data: {
+  await prisma.user.upsert({
+    where: { email: "admin@caresync.com" },
+    update: {},
+    create: {
       name: "Dr. Kusal Perera (Admin)",
       email: "admin@caresync.com",
       password: adminPassword,
@@ -77,10 +84,12 @@ async function main() {
     }
   });
 
-  // 3. Create Sample Patients
+  // 3. Ensure Sample Patients Exist (Upsert by email)
   const patientPassword = await bcrypt.hash("patient123", 10);
-  const patient1 = await prisma.user.create({
-    data: {
+  const patient1 = await prisma.user.upsert({
+    where: { email: "kasun@test.com" },
+    update: {},
+    create: {
       name: "Kasun Silva",
       email: "kasun@test.com",
       password: patientPassword,
@@ -90,8 +99,10 @@ async function main() {
     }
   });
 
-  const patient2 = await prisma.user.create({
-    data: {
+  const patient2 = await prisma.user.upsert({
+    where: { email: "nethmi@test.com" },
+    update: {},
+    create: {
       name: "Nethmi Fernando",
       email: "nethmi@test.com",
       password: patientPassword,
@@ -101,12 +112,14 @@ async function main() {
     }
   });
 
-  // 4. Create Doctors
+  // 4. Ensure Initial Default Doctors Exist (Upsert by email & userId)
   const doctorPassword = await bcrypt.hash("doctor123", 10);
 
   // Doctor 1: Cardiologist
-  const docUser1 = await prisma.user.create({
-    data: {
+  const docUser1 = await prisma.user.upsert({
+    where: { email: "dr.sarah@caresync.com" },
+    update: {},
+    create: {
       name: "Dr. Sarah Jayawardena",
       email: "dr.sarah@caresync.com",
       password: doctorPassword,
@@ -116,8 +129,10 @@ async function main() {
     }
   });
 
-  const doctor1 = await prisma.doctor.create({
-    data: {
+  const doctor1 = await prisma.doctor.upsert({
+    where: { userId: docUser1.id },
+    update: {},
+    create: {
       userId: docUser1.id,
       specialtyId: cardiology.id,
       bio: "Senior Consultant Cardiologist with 12+ years of experience in cardiovascular interventions, ECG diagnosis, and hypertension management.",
@@ -128,14 +143,16 @@ async function main() {
       startTime: "09:00",
       endTime: "16:00",
       slotDurationMinutes: 30,
-      rating: 4.9,
+      rating: 5.0,
       hospital: "CareSync Central & National Hospital Colombo"
     }
   });
 
   // Doctor 2: Dermatologist
-  const docUser2 = await prisma.user.create({
-    data: {
+  const docUser2 = await prisma.user.upsert({
+    where: { email: "dr.chamari@caresync.com" },
+    update: {},
+    create: {
       name: "Dr. Chamari Wijesinghe",
       email: "dr.chamari@caresync.com",
       password: doctorPassword,
@@ -145,8 +162,10 @@ async function main() {
     }
   });
 
-  const doctor2 = await prisma.doctor.create({
-    data: {
+  const doctor2 = await prisma.doctor.upsert({
+    where: { userId: docUser2.id },
+    update: {},
+    create: {
       userId: docUser2.id,
       specialtyId: dermatology.id,
       bio: "Specialist in clinical dermatology, laser skin therapy, acne treatments, and advanced aesthetic rejuvenation.",
@@ -157,14 +176,16 @@ async function main() {
       startTime: "10:00",
       endTime: "17:00",
       slotDurationMinutes: 30,
-      rating: 4.8,
+      rating: 5.0,
       hospital: "CareSync Aesthetics Wing, Colombo 03"
     }
   });
 
   // Doctor 3: Neurologist
-  const docUser3 = await prisma.user.create({
-    data: {
+  const docUser3 = await prisma.user.upsert({
+    where: { email: "dr.ruwan@caresync.com" },
+    update: {},
+    create: {
       name: "Dr. Ruwan Wickramasinghe",
       email: "dr.ruwan@caresync.com",
       password: doctorPassword,
@@ -174,8 +195,10 @@ async function main() {
     }
   });
 
-  const doctor3 = await prisma.doctor.create({
-    data: {
+  await prisma.doctor.upsert({
+    where: { userId: docUser3.id },
+    update: {},
+    create: {
       userId: docUser3.id,
       specialtyId: neurology.id,
       bio: "Consultant Neurologist specializing in stroke rehabilitation, migraine disorders, epilepsy management, and neurological diagnostics.",
@@ -186,14 +209,16 @@ async function main() {
       startTime: "09:00",
       endTime: "15:00",
       slotDurationMinutes: 45,
-      rating: 4.9,
+      rating: 5.0,
       hospital: "CareSync Neuro Institute, Kandy"
     }
   });
 
   // Doctor 4: Pediatrician
-  const docUser4 = await prisma.user.create({
-    data: {
+  const docUser4 = await prisma.user.upsert({
+    where: { email: "dr.anoma@caresync.com" },
+    update: {},
+    create: {
       name: "Dr. Anoma Senaratne",
       email: "dr.anoma@caresync.com",
       password: doctorPassword,
@@ -203,8 +228,10 @@ async function main() {
     }
   });
 
-  const doctor4 = await prisma.doctor.create({
-    data: {
+  await prisma.doctor.upsert({
+    where: { userId: docUser4.id },
+    update: {},
+    create: {
       userId: docUser4.id,
       specialtyId: pediatrics.id,
       bio: "Dedicated pediatric specialist focusing on child growth monitoring, newborn care, immunization plans, and adolescent health.",
@@ -215,78 +242,37 @@ async function main() {
       startTime: "08:30",
       endTime: "14:00",
       slotDurationMinutes: 30,
-      rating: 4.7,
+      rating: 5.0,
       hospital: "Lady Ridgeway & CareSync Children's Care"
     }
   });
 
-  console.log("✅ Created 4 Doctors");
+  console.log("✅ Core System Accounts & Doctors ready");
 
-  // 5. Seed Appointments
-  const today = new Date().toISOString().split("T")[0];
+  // 5. Initial Sample Reviews (Only if not already present)
+  const existingReviews = await prisma.review.count();
+  if (existingReviews === 0) {
+    await prisma.review.create({
+      data: {
+        patientId: patient1.id,
+        doctorId: doctor1.id,
+        rating: 5,
+        comment: "Dr. Sarah is very thorough and reassuring. Explained the ECG report with great clarity."
+      }
+    });
 
-  await prisma.appointment.create({
-    data: {
-      patientId: patient1.id,
-      doctorId: doctor1.id,
-      appointmentDate: today,
-      appointmentTime: "10:00 AM",
-      status: "CONFIRMED",
-      symptoms: "Mild chest tightness after exercise and routine cardiac checkup.",
-      fee: 3500,
-      paymentStatus: "PAID"
-    }
-  });
+    await prisma.review.create({
+      data: {
+        patientId: patient2.id,
+        doctorId: doctor2.id,
+        rating: 5,
+        comment: "Excellent dermatologist! The prescribed topical cream cleared my skin rash in just 3 days."
+      }
+    });
+    console.log("✅ Initial sample reviews added");
+  }
 
-  await prisma.appointment.create({
-    data: {
-      patientId: patient2.id,
-      doctorId: doctor2.id,
-      appointmentDate: today,
-      appointmentTime: "11:30 AM",
-      status: "CONFIRMED",
-      symptoms: "Skin allergy breakout and eczema consultation.",
-      fee: 3000,
-      paymentStatus: "PAID"
-    }
-  });
-
-  await prisma.appointment.create({
-    data: {
-      patientId: patient1.id,
-      doctorId: doctor3.id,
-      appointmentDate: "2026-08-28",
-      appointmentTime: "02:15 PM",
-      status: "COMPLETED",
-      symptoms: "Frequent tension headaches and migraine aura.",
-      diagnosisNotes: "Diagnosed with acute tension-type migraine exacerbated by screen fatigue.",
-      prescription: "Tab. Propranolol 20mg bd x 2 weeks, Tab. Paracetamol 500mg prn.",
-      fee: 4000,
-      paymentStatus: "PAID"
-    }
-  });
-
-  // 6. Seed Reviews
-  await prisma.review.create({
-    data: {
-      patientId: patient1.id,
-      doctorId: doctor1.id,
-      rating: 5,
-      comment: "Dr. Sarah is very thorough and reassuring. Explained the ECG report with great clarity."
-    }
-  });
-
-  await prisma.review.create({
-    data: {
-      patientId: patient2.id,
-      doctorId: doctor2.id,
-      rating: 5,
-      comment: "Excellent dermatologist! The prescribed topical cream cleared my skin rash in just 3 days."
-    }
-  });
-
-  console.log("✅ Pre-seeded Appointments and Reviews successfully!");
-  console.log("✨ CareSync Database is ready to use.");
+  console.log("✨ CareSync Database is in Safe Mode. No user data will ever be wiped.");
 }
 
 main()

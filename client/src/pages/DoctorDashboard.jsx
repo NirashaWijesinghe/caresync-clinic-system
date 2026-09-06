@@ -14,7 +14,13 @@ import {
   Search,
   Filter,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ClipboardList,
+  FileText,
+  Stethoscope,
+  X,
+  History,
+  CalendarCheck
 } from "lucide-react";
 
 export default function DoctorDashboard() {
@@ -26,11 +32,18 @@ export default function DoctorDashboard() {
   const [prescription, setPrescription] = useState("");
   const [actionSuccess, setActionSuccess] = useState("");
 
-  // Queue Filters & Pagination
-  const [queueFilter, setQueueFilter] = useState("ALL"); // ALL, CONFIRMED, COMPLETED, CANCELLED
+  // Patient Medical History State (EHR)
+  const [historyModalPatient, setHistoryModalPatient] = useState(null);
+  const [patientHistoryData, setPatientHistoryData] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  // Unified Single Queue Tab: "ALL", "TODAY", "UPCOMING", "COMPLETED", "CANCELLED"
+  const [activeTab, setActiveTab] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [queuePage, setQueuePage] = useState(1);
   const QUEUE_PER_PAGE = 5;
+
+  const todayStr = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
     fetchDoctorAppointments();
@@ -51,6 +64,21 @@ export default function DoctorDashboard() {
     setActiveConsultation(apt);
     setDiagnosisNotes(apt.diagnosisNotes || "");
     setPrescription(apt.prescription || "");
+  };
+
+  const handleViewPatientHistory = async (patient) => {
+    if (!patient || !patient.id) return;
+    setHistoryModalPatient(patient);
+    setHistoryLoading(true);
+    try {
+      const res = await API.get(`/appointments/patient-history/${patient.id}`);
+      setPatientHistoryData(res.data.history || []);
+    } catch (err) {
+      console.error("Failed to fetch medical history:", err);
+      setPatientHistoryData([]);
+    } finally {
+      setHistoryLoading(false);
+    }
   };
 
   const handleSaveConsultation = async (e) => {
@@ -86,20 +114,38 @@ export default function DoctorDashboard() {
     }
   };
 
+  // Tab Item Counts
+  const todayAwaitingCount = appointments.filter(
+    (a) => a.appointmentDate === todayStr && a.status === "CONFIRMED"
+  ).length;
+  const upcomingAwaitingCount = appointments.filter(
+    (a) => a.appointmentDate > todayStr && a.status === "CONFIRMED"
+  ).length;
   const confirmedCount = appointments.filter((a) => a.status === "CONFIRMED").length;
   const completedCount = appointments.filter((a) => a.status === "COMPLETED").length;
   const cancelledCount = appointments.filter((a) => a.status === "CANCELLED").length;
 
-  // Filtered Queue
+  // Filtered Queue by Single Unified Tab & Search
   const filteredAppointments = appointments.filter((apt) => {
-    const matchesFilter = queueFilter === "ALL" || apt.status === queueFilter;
+    let matchesTab = true;
+    if (activeTab === "TODAY") {
+      matchesTab = apt.appointmentDate === todayStr && apt.status === "CONFIRMED";
+    } else if (activeTab === "UPCOMING") {
+      matchesTab = apt.appointmentDate > todayStr && apt.status === "CONFIRMED";
+    } else if (activeTab === "COMPLETED") {
+      matchesTab = apt.status === "COMPLETED";
+    } else if (activeTab === "CANCELLED") {
+      matchesTab = apt.status === "CANCELLED";
+    } // "ALL" matches everything
+
     const term = searchQuery.toLowerCase().trim();
     const matchesSearch =
       !term ||
       apt.patient?.name?.toLowerCase().includes(term) ||
       apt.patient?.phone?.toLowerCase().includes(term) ||
       apt.patient?.email?.toLowerCase().includes(term);
-    return matchesFilter && matchesSearch;
+
+    return matchesTab && matchesSearch;
   });
 
   const totalPages = Math.ceil(filteredAppointments.length / QUEUE_PER_PAGE) || 1;
@@ -116,7 +162,7 @@ export default function DoctorDashboard() {
           <span className="text-xs font-bold text-teal-100 uppercase tracking-wider">Doctor Clinical Portal</span>
           <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">{user?.name}</h1>
           <p className="text-xs sm:text-sm text-teal-50 mt-1">
-            Manage your daily patient queue, record diagnoses, and issue digital prescriptions.
+            Manage your daily patient queue, access Electronic Health Records (EHR), and issue digital prescriptions.
           </p>
         </div>
       </div>
@@ -158,83 +204,105 @@ export default function DoctorDashboard() {
         {/* Card Header & Controls */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
-            <h3 className="font-bold text-lg text-slate-900">Patient Queue & Schedules</h3>
-            <p className="text-xs text-slate-500">Live consultation queue with status filters and search</p>
+            <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-teal-600" />
+              Patient Consultation Queue
+            </h3>
+            <p className="text-xs text-slate-400">Search patients, review EHR histories, and issue prescriptions</p>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative w-full md:w-72">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setQueuePage(1);
-              }}
-              placeholder="Search patient name, phone..."
-              className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
-            />
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setQueuePage(1);
+                }}
+                placeholder="Search patient name, phone..."
+                className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500 w-56 sm:w-64"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Status Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2 pt-1">
+        {/* 🌟 Single Unified Queue Filter Row (Industry Standard) */}
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 overflow-x-auto">
           <button
             type="button"
             onClick={() => {
-              setQueueFilter("ALL");
+              setActiveTab("ALL");
               setQueuePage(1);
             }}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              queueFilter === "ALL"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+              activeTab === "ALL"
+                ? "bg-white text-slate-900 shadow-2xs"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
             All Consultations ({appointments.length})
           </button>
+
           <button
             type="button"
             onClick={() => {
-              setQueueFilter("CONFIRMED");
+              setActiveTab("TODAY");
               setQueuePage(1);
             }}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              queueFilter === "CONFIRMED"
-                ? "bg-teal-600 text-white shadow-xs"
-                : "bg-teal-50 text-teal-700 hover:bg-teal-100"
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === "TODAY"
+                ? "bg-white text-teal-700 shadow-2xs"
+                : "text-slate-500 hover:text-teal-700"
             }`}
           >
-            <Clock className="w-3.5 h-3.5" />
-            Waiting / Queue ({confirmedCount})
+            <CalendarCheck className="w-3.5 h-3.5 text-teal-600" />
+            Today's Patients ({todayAwaitingCount})
           </button>
+
           <button
             type="button"
             onClick={() => {
-              setQueueFilter("COMPLETED");
+              setActiveTab("UPCOMING");
               setQueuePage(1);
             }}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              queueFilter === "COMPLETED"
-                ? "bg-blue-600 text-white shadow-xs"
-                : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+              activeTab === "UPCOMING"
+                ? "bg-white text-purple-700 shadow-2xs"
+                : "text-slate-500 hover:text-purple-700"
             }`}
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Completed ({completedCount})
+            Upcoming Schedule ({upcomingAwaitingCount})
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("COMPLETED");
+              setQueuePage(1);
+            }}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+              activeTab === "COMPLETED"
+                ? "bg-white text-blue-700 shadow-2xs"
+                : "text-slate-500 hover:text-blue-700"
+            }`}
+          >
+            Completed / Prescribed ({completedCount})
+          </button>
+
           {cancelledCount > 0 && (
             <button
               type="button"
               onClick={() => {
-                setQueueFilter("CANCELLED");
+                setActiveTab("CANCELLED");
                 setQueuePage(1);
               }}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                queueFilter === "CANCELLED"
-                  ? "bg-rose-600 text-white shadow-xs"
-                  : "bg-rose-50 text-rose-700 hover:bg-rose-100"
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                activeTab === "CANCELLED"
+                  ? "bg-white text-rose-700 shadow-2xs"
+                  : "text-slate-500 hover:text-rose-700"
               }`}
             >
               Cancelled ({cancelledCount})
@@ -247,8 +315,8 @@ export default function DoctorDashboard() {
           <div className="p-8 text-center text-xs text-slate-400">Loading patient schedule...</div>
         ) : filteredAppointments.length === 0 ? (
           <div className="p-12 text-center bg-slate-50 rounded-2xl space-y-1">
-            <p className="text-xs font-bold text-slate-700">No consultations found in this queue</p>
-            <p className="text-[11px] text-slate-400">Try changing the filter or search query.</p>
+            <p className="text-xs font-bold text-slate-700">No consultations found in this tab</p>
+            <p className="text-[11px] text-slate-400">Try switching tabs or adjusting the search term.</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100 border border-slate-100 rounded-2xl overflow-hidden">
@@ -261,7 +329,7 @@ export default function DoctorDashboard() {
                     className="w-12 h-12 rounded-2xl object-cover ring-2 ring-slate-100 flex-shrink-0"
                   />
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <h4 className="font-bold text-sm text-slate-900">{apt.patient?.name}</h4>
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
@@ -274,6 +342,23 @@ export default function DoctorDashboard() {
                       >
                         {apt.status}
                       </span>
+
+                      {/* Smart Date Badges */}
+                      {apt.appointmentDate === todayStr && apt.status === "CONFIRMED" && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 border border-teal-200">
+                          TODAY
+                        </span>
+                      )}
+                      {apt.appointmentDate > todayStr && apt.status === "CONFIRMED" && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+                          UPCOMING
+                        </span>
+                      )}
+                      {apt.appointmentDate < todayStr && apt.status === "CONFIRMED" && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                          PAST DATE
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
@@ -290,16 +375,26 @@ export default function DoctorDashboard() {
 
                     {apt.symptoms && (
                       <p className="text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100 inline-block mt-1">
-                        <span className="font-bold">Patient Symptoms:</span> {apt.symptoms}
+                        <span className="font-bold text-slate-800">Reported Symptoms:</span> {apt.symptoms}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div className="self-end md:self-center">
+                <div className="flex items-center gap-2 self-end md:self-center">
+                  <button
+                    type="button"
+                    onClick={() => handleViewPatientHistory(apt.patient)}
+                    className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all"
+                    title="View past medical visits, diagnoses, and prescriptions"
+                  >
+                    <History className="w-3.5 h-3.5 text-teal-600" />
+                    Medical History
+                  </button>
+
                   <button
                     onClick={() => handleOpenConsultationModal(apt)}
-                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-all"
+                    className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-all"
                   >
                     <FileEdit className="w-3.5 h-3.5" />
                     {apt.status === "COMPLETED" ? "Edit Prescription" : "Start Consultation"}
@@ -338,6 +433,125 @@ export default function DoctorDashboard() {
         )}
       </div>
 
+      {/* 📋 EHR: Patient Medical History Modal */}
+      {historyModalPatient && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-start border-b pb-4">
+              <div className="flex items-center gap-3">
+                <img
+                  src={historyModalPatient.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256"}
+                  alt={historyModalPatient.name}
+                  className="w-12 h-12 rounded-2xl object-cover ring-2 ring-teal-500/20"
+                />
+                <div>
+                  <span className="text-[11px] font-bold text-teal-600 uppercase tracking-wider">Electronic Health Record (EHR)</span>
+                  <h3 className="font-extrabold text-xl text-slate-900">{historyModalPatient.name}</h3>
+                  <p className="text-xs text-slate-500">{historyModalPatient.phone || historyModalPatient.email}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHistoryModalPatient(null)}
+                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+              {historyLoading ? (
+                <div className="py-12 text-center text-xs text-slate-400">Loading electronic health records...</div>
+              ) : patientHistoryData.length === 0 ? (
+                <div className="py-12 text-center space-y-2 bg-slate-50 rounded-2xl border border-slate-100">
+                  <ClipboardList className="w-10 h-10 text-slate-300 mx-auto" />
+                  <h4 className="font-bold text-sm text-slate-700">No Past Consultations Found</h4>
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                    This patient has no previously recorded visits or prescriptions in the CareSync system yet.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Past Clinical Visits ({patientHistoryData.length})
+                  </h4>
+
+                  {patientHistoryData.map((visit) => (
+                    <div key={visit.id} className="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+                        <div className="flex items-center gap-2">
+                          <Stethoscope className="w-4 h-4 text-teal-600" />
+                          <span className="font-bold text-xs text-slate-900">
+                            {visit.doctor?.user?.name || "Consultant"} ({visit.doctor?.specialty?.name})
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                          <span className="font-medium bg-white px-2.5 py-0.5 rounded-lg border border-slate-200 font-mono">
+                            {visit.appointmentDate} at {visit.appointmentTime}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            visit.status === "COMPLETED" ? "bg-blue-100 text-blue-800" : "bg-emerald-100 text-emerald-800"
+                          }`}>
+                            {visit.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Symptoms */}
+                      {visit.symptoms && (
+                        <div className="text-xs">
+                          <span className="font-bold text-slate-700 block mb-0.5">Reported Symptoms:</span>
+                          <p className="text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200 font-medium">
+                            {visit.symptoms}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Doctor Diagnosis Notes */}
+                      {visit.diagnosisNotes && (
+                        <div className="text-xs">
+                          <span className="font-bold text-teal-800 block mb-0.5 flex items-center gap-1">
+                            <FileText className="w-3.5 h-3.5 text-teal-600" /> Clinical Diagnosis:
+                          </span>
+                          <p className="text-slate-700 bg-teal-50/60 p-2.5 rounded-xl border border-teal-100 font-medium leading-relaxed">
+                            {visit.diagnosisNotes}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Digital Prescription */}
+                      {visit.prescription && (
+                        <div className="text-xs">
+                          <span className="font-bold text-purple-800 block mb-0.5 flex items-center gap-1">
+                            <FileEdit className="w-3.5 h-3.5 text-purple-600" /> Issued Prescription & Dosage:
+                          </span>
+                          <pre className="text-slate-800 bg-purple-50/50 p-2.5 rounded-xl border border-purple-100 font-mono whitespace-pre-wrap leading-relaxed text-[11px]">
+                            {visit.prescription}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setHistoryModalPatient(null)}
+                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all"
+              >
+                Close Records
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Consultation & Prescription Modal */}
       {activeConsultation && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -347,14 +561,31 @@ export default function DoctorDashboard() {
                 <span className="text-xs font-bold text-teal-600 uppercase">Clinical Consultation Record</span>
                 <h3 className="font-bold text-lg text-slate-900">Patient: {activeConsultation.patient?.name}</h3>
               </div>
-              <button
-                type="button"
-                onClick={() => setActiveConsultation(null)}
-                className="p-1 rounded-full hover:bg-slate-100 text-slate-500"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleViewPatientHistory(activeConsultation.patient)}
+                  className="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold rounded-xl border border-teal-200 flex items-center gap-1 transition-all"
+                >
+                  <History className="w-3.5 h-3.5" />
+                  View History
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveConsultation(null)}
+                  className="p-1 rounded-full hover:bg-slate-100 text-slate-500"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
+
+            {activeConsultation.symptoms && (
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs">
+                <span className="font-bold text-amber-900 block mb-0.5">Patient Reported Symptoms:</span>
+                <p className="text-amber-800">{activeConsultation.symptoms}</p>
+              </div>
+            )}
 
             <div className="space-y-4 text-xs">
               <div>

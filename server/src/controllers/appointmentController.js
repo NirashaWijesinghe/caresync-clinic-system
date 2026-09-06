@@ -258,8 +258,46 @@ export const createReview = async (req, res) => {
       data: { rating: Number(avgRating.toFixed(1)) }
     });
 
-    return res.status(201).json({ message: "Review submitted successfully", review });
+    return res.status(201).json({
+      message: "Review submitted successfully",
+      review
+    });
   } catch (error) {
     return res.status(500).json({ message: "Failed to submit review", error: error.message });
+  }
+};
+
+export const getPatientMedicalHistory = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    const patient = await prisma.user.findUnique({
+      where: { id: patientId },
+      select: { id: true, name: true, email: true, phone: true, avatar: true, createdAt: true }
+    });
+
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    const history = await prisma.appointment.findMany({
+      where: {
+        patientId,
+        status: "COMPLETED"
+      },
+      include: {
+        doctor: {
+          include: {
+            user: { select: { name: true, avatar: true } },
+            specialty: { select: { name: true } }
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    return res.status(200).json({ patient, history });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch patient medical history", error: error.message });
   }
 };

@@ -148,13 +148,8 @@ export default function Register() {
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
             {/* Full Name */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
-                <span>Full Name *</span>
-                {touched.name && !errors.name && formData.name.trim() && (
-                  <span className="text-[11px] text-emerald-600 flex items-center gap-0.5 font-semibold">
-                    <CheckCircle2 className="w-3 h-3" /> Valid
-                  </span>
-                )}
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Full Name *
               </label>
               <div className="relative">
                 <User className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${errors.name ? "text-red-400" : "text-slate-400"}`} />
@@ -168,9 +163,7 @@ export default function Register() {
                   className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                     errors.name
                       ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
-                      : touched.name && formData.name.trim()
-                      ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
-                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   }`}
                 />
               </div>
@@ -184,13 +177,8 @@ export default function Register() {
 
             {/* Email Address */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
-                <span>Email Address *</span>
-                {touched.email && !errors.email && formData.email.trim() && (
-                  <span className="text-[11px] text-emerald-600 flex items-center gap-0.5 font-semibold">
-                    <CheckCircle2 className="w-3 h-3" /> Valid
-                  </span>
-                )}
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Email Address *
               </label>
               <div className="relative">
                 <Mail className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${errors.email ? "text-red-400" : "text-slate-400"}`} />
@@ -204,9 +192,7 @@ export default function Register() {
                   className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                     errors.email
                       ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
-                      : touched.email && formData.email.trim()
-                      ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
-                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   }`}
                 />
               </div>
@@ -220,13 +206,8 @@ export default function Register() {
 
             {/* Phone Number */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
-                <span>Phone Number (Optional)</span>
-                {formData.phone.trim() && !errors.phone && (
-                  <span className="text-[11px] text-emerald-600 flex items-center gap-0.5 font-semibold">
-                    <CheckCircle2 className="w-3 h-3" /> Valid
-                  </span>
-                )}
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Phone Number (Optional)
               </label>
               <div className="relative">
                 <Phone className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${errors.phone ? "text-red-400" : "text-slate-400"}`} />
@@ -239,9 +220,7 @@ export default function Register() {
                   className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                     errors.phone
                       ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
-                      : formData.phone.trim() && !errors.phone
-                      ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
-                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   }`}
                 />
               </div>
@@ -256,8 +235,8 @@ export default function Register() {
             {/* Passwords (Side by side) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
-                  <span>Password *</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Password *
                 </label>
                 <div className="relative">
                   <Lock className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${errors.password ? "text-red-400" : "text-slate-400"}`} />
@@ -272,9 +251,7 @@ export default function Register() {
                     className={`w-full pl-10 pr-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                       errors.password
                         ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
-                        : touched.password && formData.password.length >= 6
-                        ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
-                        : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     }`}
                   />
                 </div>
@@ -287,13 +264,8 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
-                  <span>Confirm *</span>
-                  {formData.confirmPassword && !errors.confirmPassword && (
-                    <span className="text-[11px] text-emerald-600 flex items-center gap-0.5 font-semibold">
-                      <CheckCircle2 className="w-3 h-3" /> Match
-                    </span>
-                  )}
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Confirm *
                 </label>
                 <div className="relative">
                   <Lock className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${errors.confirmPassword ? "text-red-400" : "text-slate-400"}`} />
@@ -308,9 +280,7 @@ export default function Register() {
                     className={`w-full pl-10 pr-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                       errors.confirmPassword
                         ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
-                        : formData.confirmPassword && !errors.confirmPassword
-                        ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
-                        : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     }`}
                   />
                 </div>

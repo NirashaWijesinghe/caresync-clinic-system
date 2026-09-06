@@ -153,13 +153,8 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} noValidate autoComplete="off" className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex justify-between">
-                <span>Email Address</span>
-                {touched.email && isEmailValid && (
-                  <span className="text-[11px] text-emerald-600 flex items-center gap-0.5 font-semibold">
-                    <CheckCircle2 className="w-3 h-3" /> Valid
-                  </span>
-                )}
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Email Address
               </label>
               <div className="relative">
                 <Mail className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${emailError ? "text-red-400" : "text-slate-400"}`} />
@@ -175,9 +170,7 @@ export default function Login() {
                   className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                     emailError
                       ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
-                      : touched.email && isEmailValid
-                      ? "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-400/30"
-                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   }`}
                 />
               </div>
@@ -207,7 +200,7 @@ export default function Login() {
                   className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                     passwordError
                       ? "border-red-400 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-400/30 text-red-900"
-                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      : "border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   }`}
                 />
               </div>

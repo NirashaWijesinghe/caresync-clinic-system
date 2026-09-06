@@ -69,6 +69,9 @@ export default function DoctorProfile() {
   // Reviews Analysis & Distribution
   const allReviews = doctor.reviews || [];
   const totalReviewsCount = allReviews.length;
+  const calculatedRating = totalReviewsCount > 0
+    ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviewsCount)
+    : (doctor.rating || 5.0);
 
   const starCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
   allReviews.forEach((r) => {
@@ -113,10 +116,17 @@ export default function DoctorProfile() {
             <p className="text-sm font-medium text-slate-600">{doctor.qualifications}</p>
 
             <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-slate-600">
-              <span className="flex items-center text-amber-500 font-bold gap-1 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100">
-                <Star className="w-4 h-4 fill-amber-400" />
-                {doctor.rating?.toFixed(1) || "4.8"} ({totalReviewsCount} reviews)
-              </span>
+              {totalReviewsCount > 0 ? (
+                <span className="flex items-center text-amber-500 font-bold gap-1 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100">
+                  <Star className="w-4 h-4 fill-amber-400" />
+                  {calculatedRating.toFixed(1)} ({totalReviewsCount} {totalReviewsCount === 1 ? "review" : "reviews"})
+                </span>
+              ) : (
+                <span className="flex items-center text-blue-700 font-semibold gap-1 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
+                  <Award className="w-4 h-4 text-blue-600" />
+                  New Doctor (No reviews yet)
+                </span>
+              )}
               <span className="flex items-center gap-1.5 text-slate-600 font-semibold">
                 <Award className="w-4 h-4 text-blue-600" />
                 {doctor.experienceYears}+ Years Clinical Experience
@@ -235,14 +245,14 @@ export default function DoctorProfile() {
               {/* Left Score Card */}
               <div className="text-center md:text-left flex flex-col items-center md:items-start flex-shrink-0">
                 <span className="text-4xl font-extrabold text-slate-900 tracking-tight">
-                  {doctor.rating?.toFixed(1) || "4.8"}
+                  {calculatedRating.toFixed(1)}
                 </span>
                 <div className="flex items-center gap-1 my-1.5 text-amber-400">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       className={`w-4 h-4 ${
-                        i < Math.round(doctor.rating || 5)
+                        i < Math.round(calculatedRating)
                           ? "fill-amber-400 text-amber-400"
                           : "text-slate-300"
                       }`}
