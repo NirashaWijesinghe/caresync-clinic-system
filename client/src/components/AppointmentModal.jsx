@@ -89,7 +89,7 @@ export default function AppointmentModal({ doctor, isOpen, onClose, onSuccess })
   if (!isOpen || !doctor) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 py-8 sm:py-12 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 py-8 sm:py-12 animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden relative my-auto max-h-[90vh] flex flex-col">
         {/* Header (Pinned) */}
         <div className="px-6 py-4.5 bg-blue-600 text-white flex items-center justify-between flex-shrink-0">

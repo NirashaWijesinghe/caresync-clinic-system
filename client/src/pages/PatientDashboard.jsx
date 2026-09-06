@@ -363,7 +363,7 @@ export default function PatientDashboard() {
 
       {/* Prescription & Medical Notes Modal */}
       {selectedPrescription && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 py-8 animate-in fade-in">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-6">
             <div className="flex justify-between items-center border-b pb-4">
               <div>
@@ -423,7 +423,7 @@ export default function PatientDashboard() {
 
       {/* Review Modal */}
       {reviewModalAppointment && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 py-8 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 overflow-hidden">
             {reviewSuccess ? (
               <div className="py-8 px-4 text-center space-y-4 animate-in zoom-in-95 duration-300">
@@ -520,7 +520,7 @@ export default function PatientDashboard() {
 
       {/* SweetAlert Style Cancel Confirmation Modal */}
       {cancelModalApt && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 py-8 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-5 text-center">
             <div className="w-14 h-14 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-rose-50 animate-pulse">
               <AlertCircle className="w-8 h-8" />

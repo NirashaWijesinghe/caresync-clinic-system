@@ -841,12 +841,17 @@ export default function AdminDashboard() {
 
       {/* Onboard New Doctor Modal */}
       {showAddDoctorModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleAddDoctorSubmit} autoComplete="off" className="bg-white rounded-3xl max-w-2xl w-full p-8 shadow-2xl border border-slate-100 space-y-5">
-            <div className="flex justify-between items-center border-b pb-3">
-              <div>
-                <span className="text-xs font-bold text-blue-600 uppercase">Doctor Management</span>
-                <h3 className="font-bold text-xl text-slate-900">Onboard New Medical Consultant</h3>
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 py-8 sm:py-12 animate-in fade-in duration-200">
+          <form onSubmit={handleAddDoctorSubmit} autoComplete="off" className="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5 my-auto">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-2 sticky -top-6 sm:-top-8 bg-white/95 backdrop-blur-sm z-10 pt-1">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">
+                  <Stethoscope className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold text-blue-600 tracking-wider uppercase">Doctor Management</span>
+                  <h3 className="font-bold text-lg sm:text-xl text-slate-900">Onboard New Medical Consultant</h3>
+                </div>
               </div>
               <button
                 type="button"
@@ -854,7 +859,7 @@ export default function AdminDashboard() {
                   setShowAddDoctorModal(false);
                   setDoctorModalError("");
                 }}
-                className="p-1 rounded-full hover:bg-slate-100 text-slate-500"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all"
               >
                 ✕
               </button>
@@ -1120,7 +1125,7 @@ export default function AdminDashboard() {
 
       {/* SweetAlert Style Doctor Status Toggle Confirmation Modal */}
       {toggleModalDoc && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-5 text-center">
             <div
               className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto ring-8 animate-pulse ${

@@ -435,7 +435,7 @@ export default function DoctorDashboard() {
 
       {/* 📋 EHR: Patient Medical History Modal */}
       {historyModalPatient && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 py-8 animate-in fade-in">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 max-h-[90vh] flex flex-col">
             {/* Header */}
             <div className="flex justify-between items-start border-b pb-4">
@@ -554,7 +554,7 @@ export default function DoctorDashboard() {
 
       {/* Consultation & Prescription Modal */}
       {activeConsultation && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 py-8">
           <form onSubmit={handleSaveConsultation} className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-5">
             <div className="flex justify-between items-center border-b pb-3">
               <div>
