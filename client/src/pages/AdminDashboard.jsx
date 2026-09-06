@@ -841,16 +841,17 @@ export default function AdminDashboard() {
 
       {/* Onboard New Doctor Modal */}
       {showAddDoctorModal && (
-        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 py-8 sm:py-12 animate-in fade-in duration-200">
-          <form onSubmit={handleAddDoctorSubmit} autoComplete="off" className="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-5 my-auto">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-2 sticky -top-6 sm:-top-8 bg-white/95 backdrop-blur-sm z-10 pt-1">
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 py-6 sm:py-10 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden my-auto flex flex-col max-h-[90vh]">
+            {/* Pinned Modal Header */}
+            <div className="px-6 sm:px-8 py-4.5 border-b border-slate-100 bg-white flex justify-between items-center flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold flex-shrink-0 shadow-xs">
                   <Stethoscope className="w-5 h-5" />
                 </div>
                 <div>
                   <span className="text-[11px] font-bold text-blue-600 tracking-wider uppercase">Doctor Management</span>
-                  <h3 className="font-bold text-lg sm:text-xl text-slate-900">Onboard New Medical Consultant</h3>
+                  <h3 className="font-bold text-lg sm:text-xl text-slate-900 leading-tight">Onboard New Medical Consultant</h3>
                 </div>
               </div>
               <button
@@ -865,261 +866,267 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            {doctorModalError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>{doctorModalError}</span>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              {/* Doctor Full Name */}
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
-                  <span>Doctor Full Name *</span>
-                  {newDoctorData.name.trim().length >= 3 && !docErrors.name && (
-                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
-                      <CheckCircle2 className="w-3 h-3" /> Valid
-                    </span>
-                  )}
-                </label>
-                <input
-                  type="text"
-                  required
-                  autoComplete="off"
-                  value={newDoctorData.name}
-                  onBlur={() => setDoctorModalTouched((p) => ({ ...p, name: true }))}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, name: e.target.value })}
-                  placeholder="e.g. Dr. Nihal Jayasinghe"
-                  className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
-                    docErrors.name
-                      ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
-                      : newDoctorData.name.trim().length >= 3
-                      ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
-                      : "border-slate-300 focus:ring-2 focus:ring-blue-500"
-                  }`}
-                />
-                {docErrors.name && (
-                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
-                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
-                    {docErrors.name}
-                  </p>
+            {/* Modal Form with Enclosed Scrollable Body */}
+            <form onSubmit={handleAddDoctorSubmit} autoComplete="off" className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 sm:p-8 overflow-y-auto space-y-5 flex-1 pr-5 sm:pr-7">
+                {doctorModalError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{doctorModalError}</span>
+                  </div>
                 )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  {/* Doctor Full Name */}
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                      <span>Doctor Full Name *</span>
+                      {newDoctorData.name.trim().length >= 3 && !docErrors.name && (
+                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                          <CheckCircle2 className="w-3 h-3" /> Valid
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      autoComplete="off"
+                      value={newDoctorData.name}
+                      onBlur={() => setDoctorModalTouched((p) => ({ ...p, name: true }))}
+                      onChange={(e) => setNewDoctorData({ ...newDoctorData, name: e.target.value })}
+                      placeholder="e.g. Dr. Nihal Jayasinghe"
+                      className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
+                        docErrors.name
+                          ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
+                          : newDoctorData.name.trim().length >= 3
+                          ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+                          : "border-slate-300 focus:ring-2 focus:ring-blue-500"
+                      }`}
+                    />
+                    {docErrors.name && (
+                      <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                        <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                        {docErrors.name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Specialty Discipline */}
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Specialty Discipline *</label>
+                    <select
+                      value={newDoctorData.specialtyId}
+                      onChange={(e) => setNewDoctorData({ ...newDoctorData, specialtyId: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                    >
+                      {specialties.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Doctor Login Email */}
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                      <span>Doctor Login Email *</span>
+                      {newDoctorData.email.trim() && !docErrors.email && (
+                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                          <CheckCircle2 className="w-3 h-3" /> Valid
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      autoComplete="new-email"
+                      value={newDoctorData.email}
+                      onBlur={() => setDoctorModalTouched((p) => ({ ...p, email: true }))}
+                      onChange={(e) => setNewDoctorData({ ...newDoctorData, email: e.target.value })}
+                      placeholder="dr.nihal@caresync.com"
+                      className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
+                        docErrors.email
+                          ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
+                          : newDoctorData.email.trim() && !docErrors.email
+                          ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+                          : "border-slate-300 focus:ring-2 focus:ring-blue-500"
+                      }`}
+                    />
+                    {docErrors.email && (
+                      <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                        <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                        {docErrors.email}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Initial Password */}
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                      <span>Initial Password *</span>
+                      {newDoctorData.password.length >= 6 && (
+                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                          <CheckCircle2 className="w-3 h-3" /> Valid
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      autoComplete="new-password"
+                      value={newDoctorData.password}
+                      onBlur={() => setDoctorModalTouched((p) => ({ ...p, password: true }))}
+                      onChange={(e) => setNewDoctorData({ ...newDoctorData, password: e.target.value })}
+                      placeholder="doctor123"
+                      className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
+                        docErrors.password
+                          ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
+                          : newDoctorData.password.length >= 6
+                          ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+                          : "border-slate-300 focus:ring-2 focus:ring-blue-500"
+                      }`}
+                    />
+                    {docErrors.password && (
+                      <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                        <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                        {docErrors.password}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Qualifications */}
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                      <span>Qualifications *</span>
+                      {newDoctorData.qualifications.trim() && (
+                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                          <CheckCircle2 className="w-3 h-3" /> Valid
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      autoComplete="off"
+                      value={newDoctorData.qualifications}
+                      onBlur={() => setDoctorModalTouched((p) => ({ ...p, qualifications: true }))}
+                      onChange={(e) => setNewDoctorData({ ...newDoctorData, qualifications: e.target.value })}
+                      placeholder="e.g. MBBS, MS (Orthopedics), FRCS"
+                      className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
+                        docErrors.qualifications
+                          ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
+                          : newDoctorData.qualifications.trim()
+                          ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+                          : "border-slate-300 focus:ring-2 focus:ring-blue-500"
+                      }`}
+                    />
+                    {docErrors.qualifications && (
+                      <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                        <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                        {docErrors.qualifications}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Experience Years */}
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                      <span>Experience (Years) *</span>
+                      {newDoctorData.experienceYears !== "" && Number(newDoctorData.experienceYears) >= 0 && (
+                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                          <CheckCircle2 className="w-3 h-3" /> Valid
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={newDoctorData.experienceYears}
+                      onChange={(e) => setNewDoctorData({ ...newDoctorData, experienceYears: e.target.value })}
+                      placeholder="e.g. 8"
+                      className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Consultation Fee */}
+                  <div>
+                    <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                      <span>Consultation Fee (LKR) *</span>
+                      {newDoctorData.consultationFee !== "" && Number(newDoctorData.consultationFee) > 0 && (
+                        <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
+                          <CheckCircle2 className="w-3 h-3" /> Valid
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min="500"
+                      value={newDoctorData.consultationFee}
+                      onBlur={() => setDoctorModalTouched((p) => ({ ...p, consultationFee: true }))}
+                      onChange={(e) => setNewDoctorData({ ...newDoctorData, consultationFee: e.target.value })}
+                      placeholder="e.g. 3500"
+                      className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
+                        docErrors.consultationFee
+                          ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
+                          : newDoctorData.consultationFee !== "" && Number(newDoctorData.consultationFee) > 0
+                          ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+                          : "border-slate-300 focus:ring-2 focus:ring-blue-500"
+                      }`}
+                    />
+                    {docErrors.consultationFee && (
+                      <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
+                        <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                        {docErrors.consultationFee}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Hospital / Clinic Wing */}
+                  <div className="sm:col-span-2">
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Hospital / Clinic Wing</label>
+                    <input
+                      type="text"
+                      value={newDoctorData.hospital}
+                      onChange={(e) => setNewDoctorData({ ...newDoctorData, hospital: e.target.value })}
+                      placeholder="e.g. CareSync Central Clinic, Colombo"
+                      className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Doctor Bio */}
+                  <div className="sm:col-span-2">
+                    <label className="block font-bold text-slate-700 uppercase mb-1">Doctor Bio</label>
+                    <textarea
+                      rows={2}
+                      value={newDoctorData.bio}
+                      onChange={(e) => setNewDoctorData({ ...newDoctorData, bio: e.target.value })}
+                      placeholder="e.g. Senior specialist with extensive clinical experience..."
+                      className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
+                    ></textarea>
+                  </div>
+                </div>
               </div>
 
-              {/* Specialty Discipline */}
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1">Specialty Discipline *</label>
-                <select
-                  value={newDoctorData.specialtyId}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, specialtyId: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+              {/* Pinned Modal Footer */}
+              <div className="px-6 sm:px-8 py-4 border-t border-slate-100 bg-slate-50/80 flex gap-3 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowAddDoctorModal(false)}
+                  className="w-1/3 py-3 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl transition-all"
                 >
-                  {specialties.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={addingDoctor}
+                  className="w-2/3 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all"
+                >
+                  {addingDoctor ? "Registering..." : "Register Consultant"}
+                </button>
               </div>
-
-              {/* Doctor Login Email */}
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
-                  <span>Doctor Login Email *</span>
-                  {newDoctorData.email.trim() && !docErrors.email && (
-                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
-                      <CheckCircle2 className="w-3 h-3" /> Valid
-                    </span>
-                  )}
-                </label>
-                <input
-                  type="email"
-                  required
-                  autoComplete="new-email"
-                  value={newDoctorData.email}
-                  onBlur={() => setDoctorModalTouched((p) => ({ ...p, email: true }))}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, email: e.target.value })}
-                  placeholder="dr.nihal@caresync.com"
-                  className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
-                    docErrors.email
-                      ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
-                      : newDoctorData.email.trim() && !docErrors.email
-                      ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
-                      : "border-slate-300 focus:ring-2 focus:ring-blue-500"
-                  }`}
-                />
-                {docErrors.email && (
-                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
-                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
-                    {docErrors.email}
-                  </p>
-                )}
-              </div>
-
-              {/* Initial Password */}
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
-                  <span>Initial Password *</span>
-                  {newDoctorData.password.length >= 6 && (
-                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
-                      <CheckCircle2 className="w-3 h-3" /> Valid
-                    </span>
-                  )}
-                </label>
-                <input
-                  type="password"
-                  required
-                  autoComplete="new-password"
-                  value={newDoctorData.password}
-                  onBlur={() => setDoctorModalTouched((p) => ({ ...p, password: true }))}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, password: e.target.value })}
-                  placeholder="doctor123"
-                  className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
-                    docErrors.password
-                      ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
-                      : newDoctorData.password.length >= 6
-                      ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
-                      : "border-slate-300 focus:ring-2 focus:ring-blue-500"
-                  }`}
-                />
-                {docErrors.password && (
-                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
-                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
-                    {docErrors.password}
-                  </p>
-                )}
-              </div>
-
-              {/* Qualifications */}
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
-                  <span>Qualifications *</span>
-                  {newDoctorData.qualifications.trim() && (
-                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
-                      <CheckCircle2 className="w-3 h-3" /> Valid
-                    </span>
-                  )}
-                </label>
-                <input
-                  type="text"
-                  required
-                  autoComplete="off"
-                  value={newDoctorData.qualifications}
-                  onBlur={() => setDoctorModalTouched((p) => ({ ...p, qualifications: true }))}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, qualifications: e.target.value })}
-                  placeholder="e.g. MBBS, MS (Orthopedics), FRCS"
-                  className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
-                    docErrors.qualifications
-                      ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
-                      : newDoctorData.qualifications.trim()
-                      ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
-                      : "border-slate-300 focus:ring-2 focus:ring-blue-500"
-                  }`}
-                />
-                {docErrors.qualifications && (
-                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
-                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
-                    {docErrors.qualifications}
-                  </p>
-                )}
-              </div>
-
-              {/* Experience Years */}
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
-                  <span>Experience (Years) *</span>
-                  {newDoctorData.experienceYears !== "" && Number(newDoctorData.experienceYears) >= 0 && (
-                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
-                      <CheckCircle2 className="w-3 h-3" /> Valid
-                    </span>
-                  )}
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  value={newDoctorData.experienceYears}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, experienceYears: e.target.value })}
-                  placeholder="e.g. 8"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Consultation Fee */}
-              <div>
-                <label className="block font-bold text-slate-700 uppercase mb-1 flex justify-between">
-                  <span>Consultation Fee (LKR) *</span>
-                  {newDoctorData.consultationFee !== "" && Number(newDoctorData.consultationFee) > 0 && (
-                    <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
-                      <CheckCircle2 className="w-3 h-3" /> Valid
-                    </span>
-                  )}
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="500"
-                  value={newDoctorData.consultationFee}
-                  onBlur={() => setDoctorModalTouched((p) => ({ ...p, consultationFee: true }))}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, consultationFee: e.target.value })}
-                  placeholder="e.g. 3500"
-                  className={`w-full p-2.5 rounded-xl border text-xs transition-all ${
-                    docErrors.consultationFee
-                      ? "border-red-400 bg-red-50/20 text-red-900 focus:ring-2 focus:ring-red-400/30"
-                      : newDoctorData.consultationFee !== "" && Number(newDoctorData.consultationFee) > 0
-                      ? "border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
-                      : "border-slate-300 focus:ring-2 focus:ring-blue-500"
-                  }`}
-                />
-                {docErrors.consultationFee && (
-                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium animate-in fade-in">
-                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
-                    {docErrors.consultationFee}
-                  </p>
-                )}
-              </div>
-
-              {/* Hospital / Clinic Wing */}
-              <div className="sm:col-span-2">
-                <label className="block font-bold text-slate-700 uppercase mb-1">Hospital / Clinic Wing</label>
-                <input
-                  type="text"
-                  value={newDoctorData.hospital}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, hospital: e.target.value })}
-                  placeholder="e.g. CareSync Central Clinic, Colombo"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Doctor Bio */}
-              <div className="sm:col-span-2">
-                <label className="block font-bold text-slate-700 uppercase mb-1">Doctor Bio</label>
-                <textarea
-                  rows={2}
-                  value={newDoctorData.bio}
-                  onChange={(e) => setNewDoctorData({ ...newDoctorData, bio: e.target.value })}
-                  placeholder="e.g. Senior specialist with extensive clinical experience..."
-                  className="w-full p-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:ring-2 focus:ring-blue-500"
-                ></textarea>
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-4 border-t">
-              <button
-                type="button"
-                onClick={() => setShowAddDoctorModal(false)}
-                className="w-1/3 py-3 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={addingDoctor}
-                className="w-2/3 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md flex items-center justify-center gap-1.5"
-              >
-                {addingDoctor ? "Registering..." : "Register Consultant"}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       )}
 
